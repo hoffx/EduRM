@@ -11,11 +11,7 @@ var InstructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([A-Z]+)\s+([0-9]+)`)
 type Script struct {
 	Name         string
 	Path         string
-<<<<<<< HEAD
-	Instructions Instructions
-=======
 	Instructions map[int]Instruction
->>>>>>> f0bf6a6edb395b9218ba3d1bc35c6491ce0d9f8c
 }
 
 type Instruction struct {
