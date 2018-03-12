@@ -295,3 +295,7 @@ __pycache__/
 .vscode
 debug
 debug.*
+
+# project
+EduRM
+EduRM.exe
