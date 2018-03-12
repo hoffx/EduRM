@@ -63,7 +63,7 @@ func (ctx *Context) Next() {
 	}
 
 	if _, ok := ctx.Script.Instructions[int(ctx.InstructionCounter)]; !ok {
-		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, ctx.InstructionCounter})
+		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, int(ctx.InstructionCounter)})
 		return
 	}
 	Interpret(ctx)
