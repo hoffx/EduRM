@@ -61,9 +61,9 @@ func (ctx *Context) Next() {
 		ctx.Status = Failure
 		return
 	}
-	if ctx.Script.Instructions[int(ctx.InstructionCounter)].Identifier == "" {
-		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, int(ctx.InstructionCounter)})
-		ctx.Status = Failure
+
+	if _, ok := ctx.Script.Instructions[int(ctx.InstructionCounter)]; !ok {
+		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, ctx.InstructionCounter})
 		return
 	}
 	Interpret(ctx)
