@@ -54,11 +54,11 @@ func ParseInstruction(instruction string) (Instruction, error) {
 		return Instruction{}, errors.New("no match")
 	}
 	s := instructionRegex.FindStringSubmatch(instruction)
-	if s == nil || len(s) != 4 {
+	if s == nil || len(s) != 5 {
 		return Instruction{}, errors.New("error while matching")
 	}
 	id, _ := strconv.Atoi(s[1])
-	param, _ := strconv.Atoi(s[3])
+	param, _ := strconv.Atoi(s[4])
 	return Instruction{
 		Number:     id,
 		Identifier: s[2],
