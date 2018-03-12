@@ -293,4 +293,5 @@ __pycache__/
 
 # VS-Code
 .vscode
-
+debug
+debug.*

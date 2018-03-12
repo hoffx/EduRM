@@ -1,5 +1,7 @@
 package interpreter
 
+import "github.com/hoffx/EduRM/script"
+
 // Notification types
 const (
 	Message = iota
@@ -18,7 +20,7 @@ const (
 const (
 	ErrNotRunning                = "the script has terminated already"
 	ErrCritical                  = "the execution was stopped after a critical interpretion error occurred"
-	ErrInvalidInstructionAddress = "the called instruction does not exist"
+	ErrInvalidInstructionAddress = "the called instruction-address does not exist"
 )
 
 // Interpreter warnings
@@ -29,6 +31,7 @@ const (
 	MessTerminatedWithSuccess = "the script has terminated with success"
 )
 
+// Notification holds a notification like error messages, warnings, ...
 type Notification struct {
 	Type    int
 	Content string
@@ -36,33 +39,38 @@ type Notification struct {
 	Instruction int
 }
 
+// Context holds everything that describes an interpreter's state
 type Context struct {
 	InstructionCounter uint
 	Accumulator        int
-	Script             Script
+	Script             script.Script
 	Registers          []int
 	Output             []Notification
 	Status             int
 }
 
-func NewInterpreterContext(Script script, int registerAmount) *Context {
-	return &Context{0, 0, script, make([]int, registerAmount), make([]Notification, 0), Running}
+// NewInterpreterContext returns a context for an interpreter ready to start execution
+func NewInterpreterContext(script script.Script, registerAmount int) *Context {
+	return &Context{1, 0, script, make([]int, registerAmount), make([]Notification, 0), Running}
 }
 
+// Next interprets the current instruction
 func (ctx *Context) Next() {
 	if ctx.Status != Running {
 		ctx.Output = append(ctx.Output, Notification{Error, ErrNotRunning, -1})
+		ctx.Status = Failure
 		return
 	}
-	if ctx.InstructionCounter > len(ctx.Script.Instructions)-1 {
-		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, ctx.InstructionCounter})
+	if ctx.Script.Instructions[int(ctx.InstructionCounter)].Identifier == "" {
+		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, int(ctx.InstructionCounter)})
+		ctx.Status = Failure
 		return
 	}
 	Interpret(ctx)
 	switch ctx.Status {
 	case Success:
-		ctx.Output = append(ctx.Output, Notification{Message, MessTerminatedWithSuccess, ctx.InstructionCounter})
+		ctx.Output = append(ctx.Output, Notification{Message, MessTerminatedWithSuccess, int(ctx.InstructionCounter)})
 	case Failure:
-		ctx.Output = append(ctx.Output, Notification{Error, MessTerminatedWithSuccess, ctx.InstructionCounter})
+		ctx.Output = append(ctx.Output, Notification{Error, MessTerminatedWithSuccess, int(ctx.InstructionCounter)})
 	}
 }
