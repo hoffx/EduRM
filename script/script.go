@@ -1,9 +1,9 @@
 package script
 
 type Script struct {
-	Name string
-	Path string
-	[]Instruction instructions
+	Name         string
+	Path         string
+	Instructions Instructions
 }
 
 type Instructions struct {
