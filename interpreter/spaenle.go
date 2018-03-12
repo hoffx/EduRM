@@ -38,6 +38,8 @@ func Interpret(ctx *Context) {
 		jeq(ctx)
 	case "JNE":
 		jne(ctx)
+	case "END":
+		end(ctx)
 	default:
 		ctx.Output = append(ctx.Output, Notification{Error, ErrUnknownInstruction, int(ctx.InstructionCounter)})
 		ctx.Status = Failure

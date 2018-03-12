@@ -10,7 +10,7 @@ import (
 func TestInterpreter(t *testing.T) {
 	s, err := script.ParseFile("test.txt")
 	if err != nil {
-		log.Println(err)
+		t.Error(err)
 		return
 	}
 	ctx := NewInterpreterContext(*s, 16)
@@ -19,5 +19,5 @@ func TestInterpreter(t *testing.T) {
 		log.Println(ctx.Output)
 		log.Println(ctx.Status)
 	}
-	log.Println(ctx.Status)
+	t.Error(err)
 }

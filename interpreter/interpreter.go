@@ -21,6 +21,7 @@ const (
 	ErrNotRunning                = "the script has terminated already"
 	ErrCritical                  = "the execution was stopped after a critical interpretion error occurred"
 	ErrInvalidInstructionAddress = "the called instruction-address does not exist"
+	MessTerminatedOnFailure      = "the script failed"
 )
 
 // Interpreter warnings
@@ -63,7 +64,8 @@ func (ctx *Context) Next() {
 	}
 
 	if _, ok := ctx.Script.Instructions[int(ctx.InstructionCounter)]; !ok {
-		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, ctx.InstructionCounter})
+		ctx.Output = append(ctx.Output, Notification{Error, ErrInvalidInstructionAddress, int(ctx.InstructionCounter)})
+		ctx.Status = Failure
 		return
 	}
 	Interpret(ctx)
@@ -71,6 +73,6 @@ func (ctx *Context) Next() {
 	case Success:
 		ctx.Output = append(ctx.Output, Notification{Message, MessTerminatedWithSuccess, int(ctx.InstructionCounter)})
 	case Failure:
-		ctx.Output = append(ctx.Output, Notification{Error, MessTerminatedWithSuccess, int(ctx.InstructionCounter)})
+		ctx.Output = append(ctx.Output, Notification{Error, MessTerminatedOnFailure, int(ctx.InstructionCounter)})
 	}
 }
