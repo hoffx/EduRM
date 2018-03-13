@@ -19,5 +19,7 @@ func TestInterpreter(t *testing.T) {
 		log.Println(ctx.Output)
 		log.Println(ctx.Status)
 	}
-	t.Error(err)
+	if err != nil {
+		t.Error(err)
+	}
 }
