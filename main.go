@@ -12,9 +12,12 @@ func main() {
 		log.Fatal(err)
 	}
 	wg := sync.WaitGroup{}
-	wg.Add(1)
 	go c.Process()
 
-	c.Run()
-	wg.Wait()
+	for {
+		select {
+		case ctx := <- c.ContextChan:
+			...
+		}
+	}
 }

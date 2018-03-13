@@ -22,6 +22,7 @@ const (
 )
 
 type Controller struct {
+	ContextChan chan (interpreter.Context)
 	Context interpreter.Context
 	Mode    chan (int)
 	Delay   chan (int)
@@ -33,7 +34,7 @@ func NewController(filepath string, registerAmount int) (*Controller, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Controller{*interpreter.NewInterpreterContext(*s, registerAmount), make(chan (int)), make(chan (int))}, nil
+	return &Controller{make(chan (interpreter.Context)), *interpreter.NewInterpreterContext(*s, registerAmount), make(chan (int)), make(chan (int))}, nil
 }
 
 // Process interprets the interpreter context contained by the Controller c
@@ -89,6 +90,8 @@ func (c *Controller) Process() {
 				return
 			}
 		}
+		// push context to channel
+		c.ContextChan <- c.Context
 	}
 }
 
