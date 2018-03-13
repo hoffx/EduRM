@@ -3,50 +3,28 @@ package ui
 import (
 	"os"
 
-	"github.com/therecipe/qt/widgets"
+	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/gui"
+	"github.com/therecipe/qt/qml"
+	"github.com/therecipe/qt/quickcontrols2"
 )
 
 func Run() {
 	// Create application
-	app := widgets.NewQApplication(len(os.Args), os.Args)
+	app := gui.NewQGuiApplication(len(os.Args), os.Args)
 
-	// Create main window
-	window := widgets.NewQMainWindow(nil, 0)
-	window.SetWindowTitle("Hello World Example")
-	window.SetMinimumSize2(200, 200)
+	// Enable high DPI scaling
+	app.SetAttribute(core.Qt__AA_EnableHighDpiScaling, true)
 
-	// Create main layout
-	layout := widgets.NewQVBoxLayout()
+	// Use the material style for qml
+	quickcontrols2.QQuickStyle_SetStyle("material")
 
-	mainWidget := buildMainWidget()
+	// Create a QML application engine
+	engine := qml.NewQQmlApplicationEngine(nil)
 
-	// Set main widget as the central widget of the window
-	window.SetCentralWidget(mainWidget)
-
-	// Show the window
-	window.Show()
+	// Load the main qml file
+	engine.Load(core.NewQUrl3("qrc:/qml/main.qml", 0))
 
 	// Execute app
-	app.Exec()
-}
-
-func buildMainWidget() *QWidget {
-	// Create main widget and set the layout
-	mainWidget := widgets.NewQWidget(nil, 0)
-	mainWidget.SetLayout(layout)
-
-	// Create a line edit and add it to the layout
-	ipPath := widgets.NewQLineEdit(nil)
-	ipPath.SetPlaceholderText("filepath")
-	layout.AddWidget(ipPath, 0, 0)
-
-	// Create a button and add it to the layout
-	btPath := widgets.NewQPushButton2("submit", nil)
-	layout.AddWidget(btPath, 0, 0)
-
-	// Connect event for button
-	ptPath.ConnectClicked(func(checked bool) {
-		widgets.QMessageBox_Information(nil, "OK", ipPath.Text(),
-			widgets.QMessageBox__Ok, widgets.QMessageBox__Ok)
-	})
+	gui.QGuiApplication_Exec()
 }

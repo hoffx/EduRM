@@ -296,6 +296,9 @@ __pycache__/
 debug
 debug.*
 
+#qt
+rcc*.go
+
 # project
 EduRM
 EduRM.exe

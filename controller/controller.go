@@ -23,9 +23,9 @@ const (
 
 type Controller struct {
 	ContextChan chan (interpreter.Context)
-	Context interpreter.Context
-	Mode    chan (int)
-	Delay   chan (int)
+	Context     interpreter.Context
+	Mode        chan (int)
+	Delay       chan (int)
 }
 
 // NewController returns a Controller and an error if occurred
@@ -46,6 +46,8 @@ func (c *Controller) Process() {
 	var lastInstructionCounter uint = 0
 	var infiniteLoopCandidates []interpreter.Context = make([]interpreter.Context, 0)
 
+	c.ContextChan <- c.Context
+
 	for {
 		select {
 		case m := <-c.Mode:
@@ -53,45 +55,46 @@ func (c *Controller) Process() {
 		case d := <-c.Delay:
 			delay = d
 		default:
-			switch mode {
-			case Run:
-				time.Sleep(time.Duration(delay) * time.Millisecond)
-				c.Context.Next()
-			case Step:
-				c.Context.Next()
-				c.Mode <- Pause
-			case Pause:
-
-			case Stop:
-				c.Context.Output = append(c.Context.Output, interpreter.Notification{interpreter.Warning, WarStoppedByUser, int(c.Context.InstructionCounter)})
-				c.Context.Status = interpreter.Failure
-			}
-			// check if script ran into infinite loop
-			if lastInstructionCounter+1 != c.Context.InstructionCounter {
-				// check if current context is identical to a previous candidate
-				for _, iLCtx := range infiniteLoopCandidates {
-					if iLCtx.InstructionCounter == c.Context.InstructionCounter && c.Context.Accumulator == iLCtx.Accumulator {
-						for i := range c.Context.Registers {
-							if c.Context.Registers[i] != iLCtx.Registers[i] {
-								break
-							}
-							// script ran into infinite loop
-							c.Context.Output = append(c.Context.Output, interpreter.Notification{interpreter.Warning, WarStoppedInfiniteLoop, int(c.Context.InstructionCounter)})
-							c.Context.Status = interpreter.Failure
-						}
+			if mode != Pause {
+				if mode == Stop {
+					c.Context.Output = append(c.Context.Output, interpreter.Notification{interpreter.Warning, WarStoppedByUser, int(c.Context.InstructionCounter)})
+					c.Context.Status = interpreter.Failure
+				} else {
+					if mode == Run {
+						time.Sleep(time.Duration(delay) * time.Millisecond)
+						c.Context.Next()
+					} else {
+						c.Context.Next()
+						mode = Pause
 					}
+					// check if script ran into infinite loop
+					if lastInstructionCounter+1 != c.Context.InstructionCounter {
+						// check if current context is identical to a previous candidate
+						for _, iLCtx := range infiniteLoopCandidates {
+							if iLCtx.InstructionCounter == c.Context.InstructionCounter && c.Context.Accumulator == iLCtx.Accumulator {
+								for i := range c.Context.Registers {
+									if c.Context.Registers[i] != iLCtx.Registers[i] {
+										break
+									}
+									// script ran into infinite loop
+									c.Context.Output = append(c.Context.Output, interpreter.Notification{interpreter.Warning, WarStoppedInfiniteLoop, int(c.Context.InstructionCounter)})
+									c.Context.Status = interpreter.Failure
+								}
+							}
+						}
+						infiniteLoopCandidates = append(infiniteLoopCandidates, c.Context)
+					}
+					lastInstructionCounter = c.Context.InstructionCounter
 				}
-				infiniteLoopCandidates = append(infiniteLoopCandidates, c.Context)
+				c.ContextChan <- c.Context
+				c.Context.Output = make([]interpreter.Notification, 0)
 			}
-			lastInstructionCounter = c.Context.InstructionCounter
 
 			// exit if stopped or terminated otherwise
 			if c.Context.Status != interpreter.Running {
 				return
 			}
 		}
-		// push context to channel
-		c.ContextChan <- c.Context
 	}
 }
 
