@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-var instructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([A-Z]+)(\s+(-{0,1}[0-9]+))?`)
+var instructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([A-Z]+)(\s+(-{0,1}[0-9]+))?$`)
 
 // Script represents a script written in assembly ready to be interpreted
 type Script struct {
@@ -58,11 +58,15 @@ func ParseInstruction(instruction string) (Instruction, error) {
 		return Instruction{}, errors.New("error while matching")
 	}
 	id, _ := strconv.Atoi(s[1])
-	param, _ := strconv.Atoi(s[4])
+	params := make([]int, 0)
+	param, err := strconv.Atoi(s[4])
+	if err == nil {
+		params = append(params, param)
+	}
 	return Instruction{
 		Number:     id,
 		Identifier: s[2],
-		Parameters: []int{param},
+		Parameters: params,
 	}, nil
 }
 
