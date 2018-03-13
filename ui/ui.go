@@ -23,7 +23,7 @@ func Run() {
 	engine := qml.NewQQmlApplicationEngine(nil)
 
 	// Load the main qml file
-	engine.Load(core.NewQUrl3("qrc:/qml/main.qml", 0))
+	engine.Load(core.NewQUrl3("qml/main.qml", 0))
 
 	// Execute app
 	gui.QGuiApplication_Exec()
