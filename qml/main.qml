@@ -1,6 +1,5 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.1
-
 ApplicationWindow {
     id: window
     visible: true
@@ -50,6 +49,15 @@ ApplicationWindow {
                 id: speedSlider
                 width: 100
             }
+            Text {
+                height: parent.height
+                id: sliderText
+                text: (speedSlider.value * 2).toLocaleString(Qt.locale("en_US"), "f",2) + " s"
+                color: "#ffffff"
+                styleColor: "#ffffff"
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
@@ -80,11 +88,19 @@ ApplicationWindow {
 
             TextEdit {
                 width: parent.parent.width
-                height: parent.height
+                height: parent.parent.height
+                selectByMouse: true
+                selectByKeyboard: true
                 id: textEdit
                 focus: true
                 wrapMode: TextEdit.Wrap
                 onCursorRectangleChanged:  flick.ensureVisible(cursorRectangle)
+                padding: 15
+                MouseArea {
+                    enabled: false
+                    cursorShape: Qt.IBeamCursor
+                    anchors.fill: parent
+                }
             }
         }
         Flickable {
