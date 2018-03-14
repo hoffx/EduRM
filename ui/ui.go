@@ -2,6 +2,7 @@ package ui
 
 import (
 	"os"
+	"time"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -24,6 +25,12 @@ func Run() {
 
 	// Load the main qml file
 	engine.Load(core.NewQUrl3("qml/main.qml", 0))
+
+	go func() {
+		time.Sleep(5 * time.Second)
+		//engine.FindChild("textEdit", core.Qt__FindChildrenRecursively). //SetProperty("text", core.NewQVariant14("hi"))
+		engine.DumpObjectTree()
+	}()
 
 	// Execute app
 	gui.QGuiApplication_Exec()

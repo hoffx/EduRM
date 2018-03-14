@@ -21,6 +21,12 @@ ApplicationWindow {
         Row {
             anchors.fill: parent
             ToolButton {
+                id: loadButton
+                text: qsTr("Load")
+                font.capitalization: Font.MixedCase
+            }
+
+            ToolButton {
                 id: runButton
                 text: qsTr("Run")
                 font.capitalization: Font.MixedCase
