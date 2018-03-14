@@ -100,6 +100,7 @@ ApplicationWindow {
                     enabled: false
                     cursorShape: Qt.IBeamCursor
                     anchors.fill: parent
+                    anchors.margins: parent.padding
                 }
             }
         }

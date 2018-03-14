@@ -24,12 +24,14 @@ func Run() {
 	engine := qml.NewQQmlApplicationEngine(nil)
 
 	// Load the main qml file
-	engine.Load(core.NewQUrl3("qml/main.qml", 0))
+	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
+	obj := window.Create(engine.RootContext())
+	obj.DumpObjectTree()
+	//obj.FindChild("textEdit", core.Qt__FindChildrenRecursively).SetProperty("text", core.NewQVariant14("hi"))
 
 	go func() {
 		time.Sleep(5 * time.Second)
-		//engine.FindChild("textEdit", core.Qt__FindChildrenRecursively). //SetProperty("text", core.NewQVariant14("hi"))
-		engine.DumpObjectTree()
+		obj.FindChild("textEdit", core.Qt__FindChildrenRecursively).DumpObjectInfo() //.SetProperty("text", core.NewQVariant14("delay"))
 	}()
 
 	// Execute app
