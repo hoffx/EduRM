@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -26,12 +27,15 @@ func Run() {
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
 	obj := window.Create(engine.RootContext())
-	obj.DumpObjectTree()
+	for _, o := range obj.Children()[2].Children()[0].Children() {
+		fmt.Println("---", o.ObjectName())
+		o.DumpObjectInfo()
+	}
 	//obj.FindChild("textEdit", core.Qt__FindChildrenRecursively).SetProperty("text", core.NewQVariant14("hi"))
 
 	go func() {
 		time.Sleep(5 * time.Second)
-		obj.FindChild("textEdit", core.Qt__FindChildrenRecursively).DumpObjectInfo() //.SetProperty("text", core.NewQVariant14("delay"))
+		obj.FindChild("QQuickTextEdit", core.Qt__FindChildrenRecursively).DumpObjectInfo() //.SetProperty("text", core.NewQVariant14("delay"))
 	}()
 
 	// Execute app

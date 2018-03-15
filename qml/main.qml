@@ -58,10 +58,27 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
             }
+            Text {
+                height: parent.height
+                id: currentCmdText
+                color: "#ffffff"
+                styleColor: "#ffffff"
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
+            Text {
+                height: parent.height
+                id: instructionCounterText
+                color: "#ffffff"
+                styleColor: "#ffffff"
+                text: backend.instructionCounter
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
-    Row {
+   Row {
         anchors.topMargin: toolBar.height
         anchors.fill: parent
         Flickable {
@@ -103,6 +120,8 @@ ApplicationWindow {
                     anchors.margins: parent.padding
                 }
             }
+
+            ScrollIndicator.vertical: ScrollIndicator{}
         }
         Flickable {
             clip: true
@@ -129,6 +148,8 @@ ApplicationWindow {
                     }
                 }
             }
+
+            ScrollIndicator.vertical: ScrollIndicator {}
         }
     }
 }
