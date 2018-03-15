@@ -12,6 +12,7 @@ import (
 )
 
 func Run() {
+
 	// Create application
 	app := gui.NewQGuiApplication(len(os.Args), os.Args)
 
@@ -40,4 +41,23 @@ func Run() {
 
 	// Execute app
 	gui.QGuiApplication_Exec()
+
+	/*
+		widgets.NewQApplication(len(os.Args), os.Args)
+
+		var layout = widgets.NewQHBoxLayout()
+		layout.AddWidget(newCppWidget(), 0, 0)
+		layout.AddWidget(newSeperator(), 0, 0)
+		layout.AddWidget(newQmlWidget(), 0, 0)
+
+		var window = widgets.NewQMainWindow(nil, 0)
+
+		var centralWidget = widgets.NewQWidget(window, 0)
+		centralWidget.SetLayout(layout)
+		window.SetCentralWidget(centralWidget)
+
+		window.Show()
+
+		widgets.QApplication_Exec()
+	*/
 }

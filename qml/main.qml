@@ -1,13 +1,14 @@
 import QtQuick 2.7
+import QtQuick.Window 2.2
 import QtQuick.Controls 2.1
 ApplicationWindow {
     id: window
     visible: true
     title: "EduRM"
-    minimumWidth: 400
-    minimumHeight: 400
-    width: 640
-    height: 480
+    minimumWidth: 640
+    minimumHeight: 480
+    width: Screen.desktopAvailableWidth
+    height: Screen.desktopAvailableHeight
 
     ToolBar {
         id: toolBar
@@ -80,6 +81,16 @@ ApplicationWindow {
    Row {
         anchors.topMargin: toolBar.height
         anchors.fill: parent
+
+        Column {
+            id: files
+
+            width: parent.width * .25
+            height: parent.height
+
+        }
+
+
         Flickable {
             id: flick
 
@@ -124,7 +135,7 @@ ApplicationWindow {
         }
         Flickable {
             clip: true
-            width: parent.width * .5
+            width: parent.width * .25
             height: parent.height
             boundsBehavior: Flickable.StopAtBounds
             contentHeight: registerGrid.implicitHeight
@@ -137,15 +148,31 @@ ApplicationWindow {
                 Repeater {
                     id: registersRepeater
                     model: 100
-                    delegate: Text {
-                            objectName: "register" + index
-                            width: parent.width / 4
-                            height: width / 2
-                            text: index
-                            verticalAlignment: Text.AlignVCenter
+                    delegate: Column{
+                        width: parent.width / 4
+                        height: width
+
+                        Text {
+                            color: "#3f51b5"
+                            objectName: "registerName" + index
+                            width: parent.width
+                            height: 3 * parent.height / 5
+                            text: "R"+index
+                            verticalAlignment: Text.AlignBottom
                             horizontalAlignment: Text.AlignHCenter
                             padding: 5
                         }
+                        Text {
+                            objectName: "register" + index
+                            width: parent.width
+                            height: 2 * parent.height / 5
+                            text: index
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            font.pointSize: 20
+                        }
+
+                    }
                 }
             }
 
