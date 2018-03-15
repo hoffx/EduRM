@@ -9,10 +9,10 @@ import (
 
 // Controller modes
 const (
-	Run = iota
-	Step
-	Pause
-	Stop
+	run = iota
+	step
+	pause
+	stop
 )
 
 // Controller warnings
@@ -23,9 +23,13 @@ const (
 
 type Controller struct {
 	ContextChan chan (interpreter.Context)
-	Context     interpreter.Context
-	Mode        chan (int)
-	Delay       chan (int)
+	context     interpreter.Context
+	modeChan        chan (int)
+	delayChan       chan (int)
+	breakpointActivateChan chan (uint)
+	breakpointDeactivateChan chan (uint)
+	delay int
+	breakpoints map[uint]bool
 }
 
 // NewController returns a Controller and an error if occurred
@@ -34,64 +38,81 @@ func NewController(filepath string, registerAmount int) (*Controller, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Controller{make(chan (interpreter.Context)), *interpreter.NewInterpreterContext(*s, registerAmount), make(chan (int)), make(chan (int))}, nil
+	return &Controller{
+		ContextChan: make(chan (interpreter.Context)),
+		context: *interpreter.NewInterpreterContext(*s, registerAmount),
+		modeChan: make(chan (int)),
+		delayChan: make(chan (int)),
+		breakpointActivateChan: make(chan (uint)),
+		breakpointDeactivateChan: make(chan (uint)),
+		delay: 0,
+		breakpoints: make(map[uint]bool, 0),
+	}, nil
 }
 
 // Process interprets the interpreter context contained by the Controller c
 // Process should run as a separate goroutine
 func (c *Controller) Process() {
-	var delay int = 0
-	var mode int = Pause
+	var mode int = pause
 
 	var lastInstructionCounter uint = 0
 	var infiniteLoopCandidates []interpreter.Context = make([]interpreter.Context, 0)
 
-	c.ContextChan <- c.Context
+	c.ContextChan <- c.context
 
 	for {
 		select {
-		case m := <-c.Mode:
+		case m := <-c.modeChan:
 			mode = m
-		case d := <-c.Delay:
-			delay = d
+		case d := <-c.delayChan:
+			c.delay = d
+		case bp := <-c.breakpointActivateChan:
+			c.breakpoints[bp] = true
+		case bp := <-c.breakpointDeactivateChan:
+			c.breakpoints[bp] = false
 		default:
-			if mode != Pause {
-				if mode == Stop {
-					c.Context.Output = append(c.Context.Output, interpreter.Notification{interpreter.Warning, WarStoppedByUser, int(c.Context.InstructionCounter)})
-					c.Context.Status = interpreter.Failure
+			if mode != pause {
+				if mode == stop {
+					c.context.Output = append(c.context.Output, interpreter.Notification{interpreter.Warning, WarStoppedByUser, int(c.context.InstructionCounter)})
+					c.context.Status = interpreter.Failure
 				} else {
-					if mode == Run {
-						time.Sleep(time.Duration(delay) * time.Millisecond)
-						c.Context.Next()
+					if mode == run {
+						time.Sleep(time.Duration(c.delay) * time.Millisecond)
+						c.context.Next()
 					} else {
-						c.Context.Next()
-						mode = Pause
+						c.context.Next()
+						mode = pause
 					}
 					// check if script ran into infinite loop
-					if lastInstructionCounter+1 != c.Context.InstructionCounter {
+					if lastInstructionCounter+1 != c.context.InstructionCounter {
 						// check if current context is identical to a previous candidate
 						for _, iLCtx := range infiniteLoopCandidates {
-							if iLCtx.InstructionCounter == c.Context.InstructionCounter && c.Context.Accumulator == iLCtx.Accumulator {
-								for i := range c.Context.Registers {
-									if c.Context.Registers[i] != iLCtx.Registers[i] {
+							if iLCtx.InstructionCounter == c.context.InstructionCounter && c.context.Accumulator == iLCtx.Accumulator {
+								for i := range c.context.Registers {
+									if c.context.Registers[i] != iLCtx.Registers[i] {
 										break
 									}
 									// script ran into infinite loop
-									c.Context.Output = append(c.Context.Output, interpreter.Notification{interpreter.Warning, WarStoppedInfiniteLoop, int(c.Context.InstructionCounter)})
-									c.Context.Status = interpreter.Failure
+									c.context.Output = append(c.context.Output, interpreter.Notification{interpreter.Warning, WarStoppedInfiniteLoop, int(c.context.InstructionCounter)})
+									c.context.Status = interpreter.Failure
 								}
 							}
 						}
-						infiniteLoopCandidates = append(infiniteLoopCandidates, c.Context)
+						infiniteLoopCandidates = append(infiniteLoopCandidates, c.context)
 					}
-					lastInstructionCounter = c.Context.InstructionCounter
+					lastInstructionCounter = c.context.InstructionCounter
 				}
-				c.ContextChan <- c.Context
-				c.Context.Output = make([]interpreter.Notification, 0)
+				c.ContextChan <- c.context
+				c.context.Output = make([]interpreter.Notification, 0)
+			}
+
+			// check for breakpoint
+			if c.breakpoints[c.context.InstructionCounter] {
+				mode = pause
 			}
 
 			// exit if stopped or terminated otherwise
-			if c.Context.Status != interpreter.Running {
+			if c.context.Status != interpreter.Running {
 				return
 			}
 		}
@@ -99,21 +120,29 @@ func (c *Controller) Process() {
 }
 
 func (c *Controller) Run() {
-	c.Mode <- Run
+	c.modeChan <- run
 }
 
 func (c *Controller) Step() {
-	c.Mode <- Step
+	c.modeChan <- step
 }
 
 func (c *Controller) Pause() {
-	c.Mode <- Pause
+	c.modeChan <- pause
 }
 
 func (c *Controller) Stop() {
-	c.Mode <- Stop
+	c.modeChan <- stop
 }
 
 func (c *Controller) SetDelay(duration int) {
-	c.Delay <- duration
+	c.delayChan <- duration
+}
+
+func (c *Controller) AddBreakpoint(position uint) {
+	c.breakpointActivateChan <- position
+}
+
+func (c *Controller) DeleteBreakpoint(position uint) {
+	c.breakpointDeactivateChan <- position
 }
