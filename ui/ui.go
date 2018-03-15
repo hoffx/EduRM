@@ -27,15 +27,15 @@ func Run() {
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
 	obj := window.Create(engine.RootContext())
-	for _, o := range obj.Children()[2].Children()[0].Children() {
-		fmt.Println("---", o.ObjectName())
-		o.DumpObjectInfo()
-	}
-	//obj.FindChild("textEdit", core.Qt__FindChildrenRecursively).SetProperty("text", core.NewQVariant14("hi"))
 
 	go func() {
-		time.Sleep(5 * time.Second)
-		obj.FindChild("QQuickTextEdit", core.Qt__FindChildrenRecursively).DumpObjectInfo() //.SetProperty("text", core.NewQVariant14("delay"))
+		time.Sleep(time.Second)
+		fmt.Println("test")
+		// Access registers
+		for _, r := range obj.FindChildren2(core.NewQRegExp2("register*", core.Qt__CaseSensitive, core.QRegExp__Wildcard), core.Qt__FindChildrenRecursively) {
+			fmt.Println("-------")
+			r.DumpObjectInfo()
+		}
 	}()
 
 	// Execute app

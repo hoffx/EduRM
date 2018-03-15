@@ -71,7 +71,6 @@ ApplicationWindow {
                 id: instructionCounterText
                 color: "#ffffff"
                 styleColor: "#ffffff"
-                text: backend.instructionCounter
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
             }
@@ -139,13 +138,14 @@ ApplicationWindow {
                     id: registersRepeater
                     model: 100
                     delegate: Text {
-                        width: parent.width / 4
-                        height: width
-                        text: "0"
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        padding: 5
-                    }
+                            objectName: "register" + index
+                            width: parent.width / 4
+                            height: width / 2
+                            text: index
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            padding: 5
+                        }
                 }
             }
 
