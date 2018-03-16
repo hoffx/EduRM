@@ -19,9 +19,8 @@ const (
 // Interpreter errors
 const (
 	ErrNotRunning                = "the script has terminated already"
-	ErrCritical                  = "the execution was stopped after a critical interpretion error occurred"
+	ErrCritical                  = "the execution was stopped after a critical interpretation error occurred"
 	ErrInvalidInstructionAddress = "the called instruction-address does not exist"
-	MessTerminatedOnFailure      = "the script failed"
 )
 
 // Interpreter warnings
@@ -30,6 +29,7 @@ const ()
 // Interpreter messages
 const (
 	MessTerminatedWithSuccess = "the script has terminated with success"
+	MessTerminatedOnFailure   = "the script failed"
 )
 
 // Notification holds a notification like error messages, warnings, ...
