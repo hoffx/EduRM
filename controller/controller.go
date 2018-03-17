@@ -22,12 +22,12 @@ const (
 )
 
 type Controller struct {
-	ContextChan              chan (interpreter.Context)
+	ContextChan              chan interpreter.Context
 	context                  interpreter.Context
-	modeChan                 chan (int)
-	delayChan                chan (int)
-	breakpointActivateChan   chan (uint)
-	breakpointDeactivateChan chan (uint)
+	modeChan                 chan int
+	delayChan                chan int
+	breakpointActivateChan   chan uint
+	breakpointDeactivateChan chan uint
 	delay                    int
 	breakpoints              map[uint]bool
 }
@@ -39,12 +39,12 @@ func NewController(filepath string, registerAmount int) (*Controller, error) {
 		return nil, err
 	}
 	return &Controller{
-		ContextChan:              make(chan (interpreter.Context)),
+		ContextChan:              make(chan interpreter.Context),
 		context:                  *interpreter.NewInterpreterContext(*s, registerAmount),
-		modeChan:                 make(chan (int)),
-		delayChan:                make(chan (int)),
-		breakpointActivateChan:   make(chan (uint)),
-		breakpointDeactivateChan: make(chan (uint)),
+		modeChan:                 make(chan int),
+		delayChan:                make(chan int),
+		breakpointActivateChan:   make(chan uint),
+		breakpointDeactivateChan: make(chan uint),
 		delay:       0,
 		breakpoints: make(map[uint]bool, 0),
 	}, nil
@@ -56,7 +56,7 @@ func (c *Controller) Process() {
 	var mode int = pause
 
 	var lastInstructionCounter uint = 0
-	var infiniteLoopCandidates []interpreter.Context = make([]interpreter.Context, 0)
+	var infiniteLoopCandidates = make([]interpreter.Context, 0)
 
 	c.ContextChan <- c.context
 
