@@ -305,3 +305,4 @@ rcc*.go
 # project
 EduRM
 EduRM.exe
+*.gvdesign
