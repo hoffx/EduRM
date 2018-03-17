@@ -322,13 +322,13 @@ ApplicationWindow {
             flickableDirection: Flickable.VerticalFlick
             Grid {
                 id: registerGrid
-                columns: 4
+                columns: width / 85
                 width: parent.width
                 Repeater {
                     id: registersRepeater
                     model: 99
                     delegate: Column{
-                        width: parent.width / 4
+                        width: parent.width / parent.columns
                         height: width
 
                         Text {

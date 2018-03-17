@@ -9,7 +9,7 @@ const (
 
 // Interpret interprets the given context using its command palette
 func Interpret(ctx *Context) {
-	switch ctx.Script.Instructions[int(int(ctx.InstructionCounter))].Identifier {
+	switch ctx.Script.Instructions[int(ctx.InstructionCounter)].Identifier {
 	case "LOAD":
 		load(ctx)
 	case "DLOAD":

@@ -1,2 +1,2 @@
 # EduRM
-A interpreter for Bavarian educationnal pseudo-assembly code
+A interpreter for Bavarian educational pseudo-assembly code
