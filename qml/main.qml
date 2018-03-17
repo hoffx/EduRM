@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.1
+import QtQuick.Layouts 1.3
 ApplicationWindow {
     id: window
     visible: true
@@ -23,15 +24,6 @@ ApplicationWindow {
             anchors.left: parent.left
             height: parent.height
             width: parent.width * .7
-            ToolButton {
-                id: loadButton
-                text: qsTr("Load")
-                font.capitalization: Font.MixedCase
-            }
-            Item {
-                height: parent.height
-                width: 40
-            }
             ToolButton {
                 id: runButton
                 Image{
@@ -80,6 +72,16 @@ ApplicationWindow {
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
+            }
+            Item {
+                height: parent.height
+                width: 40
+            }
+            Switch {
+                id: bpSwitch
+                objectName: "bpSwitch"
+                scale: 0.8
+                checked: true
             }
         }
         Row {
@@ -135,6 +137,7 @@ ApplicationWindow {
    Row {
         anchors.topMargin: toolBar.height
         anchors.fill: parent
+        anchors.bottomMargin: bpBar.height
 
         Flickable {
             width: parent.width * .2
@@ -167,35 +170,36 @@ ApplicationWindow {
                         height: 50
 
                         MouseArea {
-                             anchors.fill: parent
-                             hoverEnabled: true
+                            anchors.fill: parent
+                            hoverEnabled: true
 
-                             onEntered: {
-                                 //actionList.state = "VISIBLE";
-                                 //myItem.state = "HOVER"
-                             }
-                             onExited: {
-                                 //actionList.state = "HIDDEN";
-                                 //myItem.state = "NORMAL"
-                             }
-
-
-                            Row{
+                            RowLayout{
                                 anchors.fill: parent
-                                padding: 15
 
                                 Item {
                                     height: parent.height
-                                    width: parent.width - 30 - 2 * height
-
-                                    Button {
-                                        objectName: "fileName" + index
-                                        text: "filename" + index
-                                        height: parent.height
-                                        flat: true
-                                        font.capitalization: Font.MixedCase
-                                    }
+                                    width: 10
                                 }
+
+                                Button {
+                                    objectName: "fileName" + index
+                                    height: parent.height
+                                    //width: text.length > 15 ? parent.width - 30 - 2 * height : undefined
+                                    Layout.fillWidth: true
+                                    flat: true
+                                    font.capitalization: Font.MixedCase
+
+                                    Text {
+                                        anchors.fill: parent
+                                        text: "filename" + index
+                                        verticalAlignment: Text.AlignVCenter
+                                        horizontalAlignment: Text.AlignLeft
+                                        padding: 5
+                                        elide: parent.parent.parent.containsMouse ? Text.ElideLeft : Text.ElideNone
+                                    }
+
+                                }
+
                                 ToolButton {
                                     objectName: "saveFile" + index
                                     height: parent.height
@@ -217,6 +221,10 @@ ApplicationWindow {
                                         scale: 0.5
                                         source: "img/close.png"
                                     }
+                                }
+                                Item {
+                                    height: parent.height
+                                    width: 10
                                 }
                             }
                         }
@@ -271,13 +279,17 @@ ApplicationWindow {
             ScrollIndicator.vertical: ScrollIndicator{}
         }
 
+
         Flickable {
             id: flick
             width: parent.width * .5
             height: parent.height
             flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+
 
             TextArea.flickable: TextArea {
+                font.pointSize: 13
                 width: parent.parent.width
                 height: parent.parent.height
                 selectByMouse: true
@@ -285,18 +297,24 @@ ApplicationWindow {
                 id: textEdit
                 focus: true
                 wrapMode: TextArea.Wrap
-                onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
                 padding: 15
                 background: null
+                font.family: "Menlo, Monaco, 'Courier New', monospace"
+
+
                 MouseArea {
                     enabled: false
                     cursorShape: Qt.IBeamCursor
-                    anchors.fill: parent
-                    anchors.margins: parent.padding
+                    anchors.top: parent.top
+                    anchors.topMargin: parent.padding
+                    anchors.bottomMargin: parent.padding
+                    height: parent.paintedHeight
+                    width: parent.width
                 }
             }
 
             ScrollBar.vertical: ScrollBar {}
+            //ScrollIndicator.vertical: ScrollIndicator{}
         }
 
         Flickable {
@@ -345,4 +363,16 @@ ApplicationWindow {
             ScrollIndicator.vertical: ScrollIndicator {}
         }
     }
+
+
+
+   ToolBar {
+       id: bpBar
+       position: ToolBar.Footer
+       height: 50
+       anchors.left: parent.left
+       anchors.bottom: parent.bottom
+       anchors.right: parent.right
+
+   }
 }
