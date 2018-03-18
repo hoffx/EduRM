@@ -25,6 +25,14 @@ ApplicationWindow {
             height: parent.height
             width: parent.width * .7
             ToolButton {
+                id: loadButton
+                Image{
+                    anchors.fill: parent
+                    scale: 0.5
+                    source: "img/load.png"
+                }
+            }
+            ToolButton {
                 id: runButton
                 Image{
                     anchors.fill: parent
@@ -72,17 +80,7 @@ ApplicationWindow {
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-            }
-            Item {
-                height: parent.height
-                width: 40
-            }
-            Switch {
-                id: bpSwitch
-                objectName: "bpSwitch"
-                scale: 0.8
-                checked: true
-            }
+            }            
         }
         Row {
             anchors.right: parent.right
@@ -146,17 +144,6 @@ ApplicationWindow {
             boundsBehavior: Flickable.StopAtBounds
             contentHeight: filesColumn.implicitHeight
             clip: true
-
-            function ensureVisible(r) {
-                if (contentX >= r.x)
-                    contentX = r.x
-                else if (contentX + width <= r.x + r.width)
-                    contentX = r.x + r.width - width
-                if (contentY >= r.y)
-                    contentY = r.y
-                else if (contentY + height <= r.y + r.height)
-                    contentY = r.y + r.height - height
-            }
 
             Column{
                 id: filesColumn
@@ -374,5 +361,76 @@ ApplicationWindow {
        anchors.bottom: parent.bottom
        anchors.right: parent.right
 
+       Row{
+           anchors.fill: parent
+           anchors.leftMargin: 10
+           anchors.rightMargin: 10
+
+           Switch {
+               id: bpSwitch
+               objectName: "bpSwitch"
+               scale: 0.8
+               checked: true
+               height: parent.height
+           }
+           Item {
+               height: parent.height
+               width: 40
+           }
+           TextField {
+               id: bpInput
+               height: parent.height
+               verticalAlignment: Text.AlignVCenter
+               color: "#ffffff"
+               validator: IntValidator{bottom: 1;}
+               placeholderText: "instruction counter"
+
+           }
+           ToolButton {
+               objectName: "addBreakPoint"
+               height: parent.height
+               width: height
+               Image{
+                   anchors.fill: parent
+                   scale: 0.5
+                   source: "img/add.png"
+               }
+           }
+           Item {
+               height: parent.height
+               width: 40
+           }
+           Flickable {
+               clip: true
+               width: parent.width - 80 - parent.height - bpInput.width - bpSwitch.width - 10
+               height: parent.height
+               boundsBehavior: Flickable.StopAtBounds
+               contentWidth: bpList.implicitWidth
+               flickableDirection: Flickable.HorizontalFlick
+
+               Row {
+                   id: bpList
+                   height: parent.height
+                   Repeater {
+                       height: parent.height
+                       id: bpRepeater
+                       model: 20
+                       delegate: ToolButton{
+                            height: parent.height
+
+                            contentItem: Text {
+                                text: "Breakpoint" + index
+                                height: parent.height
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                color: parent.hovered ? "#e91e63" : "#ffffff"
+                            }
+
+                       }
+                   }
+               }
+           }
+
+       }
    }
 }
