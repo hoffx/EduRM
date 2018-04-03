@@ -96,7 +96,7 @@ func AddFile(path string) (err error) {
 }
 
 // Current returns the currently opened file. If there are
-// no files yet, nil is returned.
+// no files yet, nil is returned
 func Current() *File {
 	if current == "" {
 		return nil
@@ -109,19 +109,19 @@ func GetByName(name string) *File {
 	return files[name]
 }
 
-// GetAll returns a map of all files. The key is the file's name.
+// GetAll returns a map of all files. The key is the file's name
 func GetAll() map[string]*File {
 	return files
 }
 
 // Remove deletes the according file from the program's
-// list, but not from the disk.
+// list, but not from the disk
 func Remove(name string) {
 	delete(files, name)
 }
 
 // Erase deletes the according file from the program's
-// list and from the disk.
+// list and from the disk
 func Erase(name string) (err error) {
 	err = os.Remove(files[name].path)
 	if err != nil {
@@ -129,6 +129,11 @@ func Erase(name string) (err error) {
 	}
 	Remove(name)
 	return
+}
+
+// SetCurrent sets the currently opened file by its name
+func SetCurrent(name string) {
+	current = name
 }
 
 func buildName(pathelements []string) (name string) {
