@@ -12,7 +12,6 @@ ApplicationWindow {
     height: Screen.desktopAvailableHeight
 
     ToolBar {
-        objectName: "topToolBar"
         id: toolBar
         position: ToolBar.Header
         height: 50
@@ -21,20 +20,17 @@ ApplicationWindow {
         anchors.top: parent.top
 
         Row {
-            objectName: "topToolBar.Row"
             anchors.leftMargin: 10
             anchors.left: parent.left
             height: parent.height
             width: parent.width * .7
             ToolButton {
-                objectName: "topToolBar.Row.loadButton"
                 id: loadButton
                 Image{
                     anchors.fill: parent
                     scale: 0.5
                     source: "img/load.png"
                 }
-                onClicked: qmlBridge.sendToGo(this.objectName, "click", "reload")                
             }
             ToolButton {
                 id: runButton
@@ -77,7 +73,6 @@ ApplicationWindow {
                 width: 100
             }
             Text {
-                objectName: "topToolBar.Row.sliderText"
                 height: parent.height
                 id: sliderText
                 text: (speedSlider.value * 5).toLocaleString(Qt.locale("en_US"), "f",1) + " s"
@@ -281,7 +276,6 @@ ApplicationWindow {
 
 
             TextArea.flickable: TextArea {
-                objectName: "BodyRow.TextArea"
                 font.pointSize: 13
                 width: parent.parent.width
                 height: parent.parent.height
@@ -319,13 +313,11 @@ ApplicationWindow {
 
             flickableDirection: Flickable.VerticalFlick
             Grid {
-                objectName: "body.registerGrid"
                 id: registerGrid
                 columns: width / 85
                 width: parent.width
                 Repeater {
-                    objectName: "body.registerGrid.Repeater"
-                    id: registerRepeater
+                    id: registersRepeater
                     model: 99
                     delegate: Column{
                         width: parent.width / parent.columns

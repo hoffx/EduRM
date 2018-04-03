@@ -1,0 +1,27 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+<file>qml/img/add.gvdesign</file>
+<file>qml/img/add.png</file>
+<file>qml/img/close.gvdesign</file>
+<file>qml/img/close.png</file>
+<file>qml/img/load.gvdesign</file>
+<file>qml/img/load.png</file>
+<file>qml/img/open.gvdesign</file>
+<file>qml/img/open.png</file>
+<file>qml/img/pause.gvdesign</file>
+<file>qml/img/pause.png</file>
+<file>qml/img/run.gvdesign</file>
+<file>qml/img/run.png</file>
+<file>qml/img/save.gvdesign</file>
+<file>qml/img/save.png</file>
+<file>qml/img/step.gvdesign</file>
+<file>qml/img/step.png</file>
+<file>qml/img/stop.gvdesign</file>
+<file>qml/img/stop.png</file>
+<file>qml/layout-sample.qml</file>
+<file>qml/main.qml</file>
+<file>qml/main.qmlc</file>
+<file>qml/qml.qmlproject</file>
+<file>qml/qml.qmlproject.user</file>
+</qresource>
+</RCC>
