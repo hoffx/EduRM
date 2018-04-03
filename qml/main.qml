@@ -114,13 +114,22 @@ ApplicationWindow {
             Text {
                 padding: 5
                 id: currentCmdText
-                text: qsTr("LOAD 4")
+                //text: qsTr("LOAD 4")
                 height: parent.height
                 color: "#ffffff"
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 18
+
+                Connections
+                {
+                    target: qmlBridge
+                    onSendToQml:
+                    {
+                        currentCmdText.text = data
+                    }
+                }
             }
         }
         Text {
@@ -293,7 +302,7 @@ ApplicationWindow {
                 padding: 15
                 background: null
                 font.family: "Menlo, Monaco, 'Courier New', monospace"
-
+                text: "baum"
 
                 MouseArea {
                     enabled: false

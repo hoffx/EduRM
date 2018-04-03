@@ -17,7 +17,7 @@ struct Moc_PackedString { char* data; long long len; };
 struct Moc_PackedList { void* data; long long len; };
 void QmlBridge_ConnectSendToQml(void* ptr);
 void QmlBridge_DisconnectSendToQml(void* ptr);
-void QmlBridge_SendToQml(void* ptr, struct Moc_PackedString source, struct Moc_PackedString action, struct Moc_PackedString data);
+void QmlBridge_SendToQml(void* ptr, struct Moc_PackedString data);
 void QmlBridge_SendToGo(void* ptr, struct Moc_PackedString source, struct Moc_PackedString action, struct Moc_PackedString data);
 int QmlBridge_QmlBridge_QRegisterMetaType();
 int QmlBridge_QmlBridge_QRegisterMetaType2(char* typeName);

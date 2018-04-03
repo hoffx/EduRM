@@ -77,14 +77,14 @@ func callbackQmlBridge_Constructor(ptr unsafe.Pointer) {
 }
 
 //export callbackQmlBridge_SendToQml
-func callbackQmlBridge_SendToQml(ptr unsafe.Pointer, source C.struct_Moc_PackedString, action C.struct_Moc_PackedString, data C.struct_Moc_PackedString) {
+func callbackQmlBridge_SendToQml(ptr unsafe.Pointer, data C.struct_Moc_PackedString) {
 	if signal := qt.GetSignal(ptr, "sendToQml"); signal != nil {
-		signal.(func(string, string, string))(cGoUnpackString(source), cGoUnpackString(action), cGoUnpackString(data))
+		signal.(func(string))(cGoUnpackString(data))
 	}
 
 }
 
-func (ptr *QmlBridge) ConnectSendToQml(f func(source string, action string, data string)) {
+func (ptr *QmlBridge) ConnectSendToQml(f func(data string)) {
 	if ptr.Pointer() != nil {
 
 		if !qt.ExistsSignal(ptr.Pointer(), "sendToQml") {
@@ -92,9 +92,9 @@ func (ptr *QmlBridge) ConnectSendToQml(f func(source string, action string, data
 		}
 
 		if signal := qt.LendSignal(ptr.Pointer(), "sendToQml"); signal != nil {
-			qt.ConnectSignal(ptr.Pointer(), "sendToQml", func(source string, action string, data string) {
-				signal.(func(string, string, string))(source, action, data)
-				f(source, action, data)
+			qt.ConnectSignal(ptr.Pointer(), "sendToQml", func(data string) {
+				signal.(func(string))(data)
+				f(data)
 			})
 		} else {
 			qt.ConnectSignal(ptr.Pointer(), "sendToQml", f)
@@ -109,24 +109,14 @@ func (ptr *QmlBridge) DisconnectSendToQml() {
 	}
 }
 
-func (ptr *QmlBridge) SendToQml(source string, action string, data string) {
+func (ptr *QmlBridge) SendToQml(data string) {
 	if ptr.Pointer() != nil {
-		var sourceC *C.char
-		if source != "" {
-			sourceC = C.CString(source)
-			defer C.free(unsafe.Pointer(sourceC))
-		}
-		var actionC *C.char
-		if action != "" {
-			actionC = C.CString(action)
-			defer C.free(unsafe.Pointer(actionC))
-		}
 		var dataC *C.char
 		if data != "" {
 			dataC = C.CString(data)
 			defer C.free(unsafe.Pointer(dataC))
 		}
-		C.QmlBridge_SendToQml(ptr.Pointer(), C.struct_Moc_PackedString{data: sourceC, len: C.longlong(len(source))}, C.struct_Moc_PackedString{data: actionC, len: C.longlong(len(action))}, C.struct_Moc_PackedString{data: dataC, len: C.longlong(len(data))})
+		C.QmlBridge_SendToQml(ptr.Pointer(), C.struct_Moc_PackedString{data: dataC, len: C.longlong(len(data))})
 	}
 }
 

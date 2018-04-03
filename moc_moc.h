@@ -33,14 +33,14 @@ static const qt_meta_stringdata_QmlBridge_t qt_meta_stringdata_QmlBridge = {
 QT_MOC_LITERAL(0, 0, 9), // "QmlBridge"
 QT_MOC_LITERAL(1, 10, 9), // "sendToQml"
 QT_MOC_LITERAL(2, 20, 0), // ""
-QT_MOC_LITERAL(3, 21, 6), // "source"
-QT_MOC_LITERAL(4, 28, 6), // "action"
-QT_MOC_LITERAL(5, 35, 4), // "data"
-QT_MOC_LITERAL(6, 40, 8) // "sendToGo"
+QT_MOC_LITERAL(3, 21, 4), // "data"
+QT_MOC_LITERAL(4, 26, 8), // "sendToGo"
+QT_MOC_LITERAL(5, 35, 6), // "source"
+QT_MOC_LITERAL(6, 42, 6) // "action"
 
     },
-    "QmlBridge\0sendToQml\0\0source\0action\0"
-    "data\0sendToGo"
+    "QmlBridge\0sendToQml\0\0data\0sendToGo\0"
+    "source\0action"
 };
 #undef QT_MOC_LITERAL
 
@@ -58,16 +58,16 @@ static const uint qt_meta_data_QmlBridge[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    3,   24,    2, 0x06 /* Public */,
+       1,    1,   24,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       6,    3,   31,    2, 0x0a /* Public */,
+       4,    3,   27,    2, 0x0a /* Public */,
 
  // signals: parameters
-    QMetaType::Void, QMetaType::QString, QMetaType::QString, QMetaType::QString,    3,    4,    5,
+    QMetaType::Void, QMetaType::QString,    3,
 
  // slots: parameters
-    QMetaType::Void, QMetaType::QString, QMetaType::QString, QMetaType::QString,    3,    4,    5,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString, QMetaType::QString,    5,    6,    3,
 
        0        // eod
 };
@@ -78,14 +78,14 @@ void QmlBridge::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         QmlBridge *_t = static_cast<QmlBridge *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->sendToQml((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3]))); break;
+        case 0: _t->sendToQml((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 1: _t->sendToGo((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            typedef void (QmlBridge::*_t)(QString , QString , QString );
+            typedef void (QmlBridge::*_t)(QString );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&QmlBridge::sendToQml)) {
                 *result = 0;
                 return;
@@ -131,9 +131,9 @@ int QmlBridge::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void QmlBridge::sendToQml(QString _t1, QString _t2, QString _t3)
+void QmlBridge::sendToQml(QString _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_WARNING_POP

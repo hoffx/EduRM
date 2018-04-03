@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -14,7 +15,7 @@ import (
 type QmlBridge struct {
 	core.QObject
 
-	//_ func(source, action, data string) `signal:"sendToQml"`
+	_ func(data string)                 `signal:"sendToQml"`
 	_ func(source, action, data string) `slot:"sendToGo"`
 }
 
@@ -45,6 +46,12 @@ func main() {
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
 	root = window.Create(engine.RootContext())
 
+	go func() {
+		for t := range time.NewTicker(time.Second * 1).C {
+			qmlBridge.SendToQml(t.Format(time.ANSIC))
+		}
+	}()
+
 	// Execute app
 	gui.QGuiApplication_Exec()
 }
@@ -52,8 +59,11 @@ func main() {
 func interpretQmlCommand(source, action, data string) {
 	log.Println(source + action + data)
 	if source == "topToolBar.Row.loadButton" && action == "click" && data == "reload" {
-		textarea := root.FindChild("BodyRow.TextArea", core.Qt__FindChildrenRecursively)
+		/*textarea := root.FindChild("BodyRow.TextArea", core.Qt__FindChildrenRecursively)
 		textarea.DumpObjectInfo()
+		textAreaText := textarea.Property("text")
+		text := "baum"
+		textAreaText = &core.QVariant{unsafe.Pointer{}}*/
 	}
 }
 
