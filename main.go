@@ -15,7 +15,7 @@ import (
 type QmlBridge struct {
 	core.QObject
 
-	_ func(data string)                 `signal:"sendToQml"`
+	_ func(target, action, data string) `signal:"sendToQml"`
 	_ func(source, action, data string) `slot:"sendToGo"`
 }
 
@@ -48,7 +48,14 @@ func main() {
 
 	go func() {
 		for t := range time.NewTicker(time.Second * 1).C {
-			qmlBridge.SendToQml(t.Format(time.ANSIC))
+			option := time.Now().Second() % 3
+			if option == 0 {
+				qmlBridge.SendToQml("topToolBar.Row2.currentCmdText", "write", t.Format(time.ANSIC))
+			} else if option == 1 {
+				qmlBridge.SendToQml("topToolBar.Row2.currentCmdText", "delete", "")
+			} else {
+				qmlBridge.SendToQml("topToolBar.Row2.currentCmdText", "delete", "")
+			}
 		}
 	}()
 

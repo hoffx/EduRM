@@ -11,6 +11,35 @@ ApplicationWindow {
     width: Screen.desktopAvailableWidth
     height: Screen.desktopAvailableHeight
 
+    Connections
+    {
+        target: qmlBridge
+        onSendToQml:
+        {
+            switch(target) {
+            case "topToolBar.Row2.currentCmdText":
+                switch(action) {
+                case "write":
+                    currentCmdText.text = data
+                    break;
+                case "delete":
+                    currentCmdText.text = ""
+                    break;
+                default:
+                    currentCmdText.text = ""
+                    break;
+                }
+                break;
+            case "other":
+                currentCmdText.text = ""
+                break;
+            default:
+                currentCmdText.text = ""
+                break;
+            }
+        }
+    }
+
     ToolBar {
         objectName: "topToolBar"
         id: toolBar
@@ -88,6 +117,7 @@ ApplicationWindow {
             }            
         }
         Row {
+            objectName: "topToolBar.Row2"
             anchors.right: parent.right
             height: parent.height
             width: parent.width * .3
@@ -113,6 +143,7 @@ ApplicationWindow {
             }
             Text {
                 padding: 5
+                objectName: "topToolBar.Row2.currentCmdText"
                 id: currentCmdText
                 //text: qsTr("LOAD 4")
                 height: parent.height
@@ -121,15 +152,6 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 18
-
-                Connections
-                {
-                    target: qmlBridge
-                    onSendToQml:
-                    {
-                        currentCmdText.text = data
-                    }
-                }
             }
         }
         Text {

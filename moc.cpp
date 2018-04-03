@@ -44,7 +44,7 @@ class QmlBridge: public QObject
 Q_OBJECT
 public:
 	QmlBridge(QObject *parent = Q_NULLPTR) : QObject(parent) {qRegisterMetaType<quintptr>("quintptr");QmlBridge_QmlBridge_QRegisterMetaType();QmlBridge_QmlBridge_QRegisterMetaTypes();callbackQmlBridge_Constructor(this);};
-	void Signal_SendToQml(QString data) { QByteArray ta17c9a = data.toUtf8(); Moc_PackedString dataPacked = { const_cast<char*>(ta17c9a.prepend("WHITESPACE").constData()+10), ta17c9a.size()-10 };callbackQmlBridge_SendToQml(this, dataPacked); };
+	void Signal_SendToQml(QString target, QString action, QString data) { QByteArray t0e8a3a = target.toUtf8(); Moc_PackedString targetPacked = { const_cast<char*>(t0e8a3a.prepend("WHITESPACE").constData()+10), t0e8a3a.size()-10 };QByteArray t34eb4c = action.toUtf8(); Moc_PackedString actionPacked = { const_cast<char*>(t34eb4c.prepend("WHITESPACE").constData()+10), t34eb4c.size()-10 };QByteArray ta17c9a = data.toUtf8(); Moc_PackedString dataPacked = { const_cast<char*>(ta17c9a.prepend("WHITESPACE").constData()+10), ta17c9a.size()-10 };callbackQmlBridge_SendToQml(this, targetPacked, actionPacked, dataPacked); };
 	 ~QmlBridge() { callbackQmlBridge_DestroyQmlBridge(this); };
 	bool event(QEvent * e) { return callbackQmlBridge_Event(this, e) != 0; };
 	bool eventFilter(QObject * watched, QEvent * event) { return callbackQmlBridge_EventFilter(this, watched, event) != 0; };
@@ -58,7 +58,7 @@ public:
 	void timerEvent(QTimerEvent * event) { callbackQmlBridge_TimerEvent(this, event); };
 	
 signals:
-	void sendToQml(QString data);
+	void sendToQml(QString target, QString action, QString data);
 public slots:
 	void sendToGo(QString source, QString action, QString data) { QByteArray t828d33 = source.toUtf8(); Moc_PackedString sourcePacked = { const_cast<char*>(t828d33.prepend("WHITESPACE").constData()+10), t828d33.size()-10 };QByteArray t34eb4c = action.toUtf8(); Moc_PackedString actionPacked = { const_cast<char*>(t34eb4c.prepend("WHITESPACE").constData()+10), t34eb4c.size()-10 };QByteArray ta17c9a = data.toUtf8(); Moc_PackedString dataPacked = { const_cast<char*>(ta17c9a.prepend("WHITESPACE").constData()+10), ta17c9a.size()-10 };callbackQmlBridge_SendToGo(this, sourcePacked, actionPacked, dataPacked); };
 private:
@@ -72,17 +72,17 @@ void QmlBridge_QmlBridge_QRegisterMetaTypes() {
 
 void QmlBridge_ConnectSendToQml(void* ptr)
 {
-	QObject::connect(static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString)>(&QmlBridge::sendToQml), static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString)>(&QmlBridge::Signal_SendToQml));
+	QObject::connect(static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString, QString, QString)>(&QmlBridge::sendToQml), static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString, QString, QString)>(&QmlBridge::Signal_SendToQml));
 }
 
 void QmlBridge_DisconnectSendToQml(void* ptr)
 {
-	QObject::disconnect(static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString)>(&QmlBridge::sendToQml), static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString)>(&QmlBridge::Signal_SendToQml));
+	QObject::disconnect(static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString, QString, QString)>(&QmlBridge::sendToQml), static_cast<QmlBridge*>(ptr), static_cast<void (QmlBridge::*)(QString, QString, QString)>(&QmlBridge::Signal_SendToQml));
 }
 
-void QmlBridge_SendToQml(void* ptr, struct Moc_PackedString data)
+void QmlBridge_SendToQml(void* ptr, struct Moc_PackedString target, struct Moc_PackedString action, struct Moc_PackedString data)
 {
-	static_cast<QmlBridge*>(ptr)->sendToQml(QString::fromUtf8(data.data, data.len));
+	static_cast<QmlBridge*>(ptr)->sendToQml(QString::fromUtf8(target.data, target.len), QString::fromUtf8(action.data, action.len), QString::fromUtf8(data.data, data.len));
 }
 
 void QmlBridge_SendToGo(void* ptr, struct Moc_PackedString source, struct Moc_PackedString action, struct Moc_PackedString data)
