@@ -306,3 +306,6 @@ rcc*.go
 EduRM
 EduRM.exe
 *.gvdesign
+
+# qtmoc files
+*moc*

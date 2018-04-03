@@ -11,7 +11,37 @@ ApplicationWindow {
     width: Screen.desktopAvailableWidth
     height: Screen.desktopAvailableHeight
 
+    Connections
+    {
+        target: qmlBridge
+        onSendToQml:
+        {
+            switch(target) {
+            case "topToolBar.Row2.currentCmdText":
+                switch(action) {
+                case "write":
+                    currentCmdText.text = data
+                    break;
+                case "delete":
+                    currentCmdText.text = ""
+                    break;
+                default:
+                    currentCmdText.text = ""
+                    break;
+                }
+                break;
+            case "other":
+                currentCmdText.text = ""
+                break;
+            default:
+                currentCmdText.text = ""
+                break;
+            }
+        }
+    }
+
     ToolBar {
+        objectName: "topToolBar"
         id: toolBar
         position: ToolBar.Header
         height: 50
@@ -20,17 +50,20 @@ ApplicationWindow {
         anchors.top: parent.top
 
         Row {
+            objectName: "topToolBar.Row"
             anchors.leftMargin: 10
             anchors.left: parent.left
             height: parent.height
             width: parent.width * .7
             ToolButton {
+                objectName: "topToolBar.Row.loadButton"
                 id: loadButton
                 Image{
                     anchors.fill: parent
                     scale: 0.5
                     source: "img/load.png"
                 }
+                onClicked: qmlBridge.sendToGo(this.objectName, "click", "reload")                
             }
             ToolButton {
                 id: runButton
@@ -73,9 +106,10 @@ ApplicationWindow {
                 width: 100
             }
             Text {
+                objectName: "topToolBar.Row.sliderText"
                 height: parent.height
                 id: sliderText
-                text: (speedSlider.value * 2).toLocaleString(Qt.locale("en_US"), "f",2) + " s"
+                text: (speedSlider.value * 5).toLocaleString(Qt.locale("en_US"), "f",1) + " s"
                 color: "#ffffff"
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
@@ -83,6 +117,7 @@ ApplicationWindow {
             }            
         }
         Row {
+            objectName: "topToolBar.Row2"
             anchors.right: parent.right
             height: parent.height
             width: parent.width * .3
@@ -108,8 +143,9 @@ ApplicationWindow {
             }
             Text {
                 padding: 5
+                objectName: "topToolBar.Row2.currentCmdText"
                 id: currentCmdText
-                text: qsTr("LOAD 4")
+                //text: qsTr("LOAD 4")
                 height: parent.height
                 color: "#ffffff"
                 styleColor: "#ffffff"
@@ -276,6 +312,7 @@ ApplicationWindow {
 
 
             TextArea.flickable: TextArea {
+                objectName: "BodyRow.TextArea"
                 font.pointSize: 13
                 width: parent.parent.width
                 height: parent.parent.height
@@ -287,7 +324,7 @@ ApplicationWindow {
                 padding: 15
                 background: null
                 font.family: "Menlo, Monaco, 'Courier New', monospace"
-
+                text: "baum"
 
                 MouseArea {
                     enabled: false
@@ -313,11 +350,13 @@ ApplicationWindow {
 
             flickableDirection: Flickable.VerticalFlick
             Grid {
+                objectName: "body.registerGrid"
                 id: registerGrid
                 columns: width / 85
                 width: parent.width
                 Repeater {
-                    id: registersRepeater
+                    objectName: "body.registerGrid.Repeater"
+                    id: registerRepeater
                     model: 99
                     delegate: Column{
                         width: parent.width / parent.columns
@@ -378,6 +417,7 @@ ApplicationWindow {
                width: 40
            }
            TextField {
+               objectName: "bpInput"
                id: bpInput
                height: parent.height
                verticalAlignment: Text.AlignVCenter

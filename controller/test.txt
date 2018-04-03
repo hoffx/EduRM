@@ -1,0 +1,3 @@
+12: MOV 1
+1: LOAD 3
+4 LOAD 17 -- test
