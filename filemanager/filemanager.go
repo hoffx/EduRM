@@ -117,6 +117,9 @@ func GetAll() map[string]*File {
 // Remove deletes the according file from the program's
 // list, but not from the disk
 func Remove(name string) {
+	if name == current {
+		current = ""
+	}
 	delete(files, name)
 }
 

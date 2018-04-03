@@ -20,7 +20,7 @@ ApplicationWindow {
             case "topToolBar.Row2.currentCmdText":
                 switch(action) {
                 case "write":
-                    currentCmdText.text = data
+                    currentCmdText.text = datacontent
                     break;
                 case "delete":
                     currentCmdText.text = ""
@@ -30,14 +30,25 @@ ApplicationWindow {
                     break;
                 }
                 break;
-            case "other":
-                currentCmdText.text = ""
+            case "filemanagement":
+                switch(action) {
+                case "add":
+                    filepath.text = ""
+                    Qt.createQmlObject(openFile('filelistitem.qml').replace("datacontent", '"' + datacontent + '"'), filesColumn, 'filelistitem.qml')
+                }
                 break;
             default:
                 currentCmdText.text = ""
                 break;
             }
         }
+    }
+
+    function openFile(fileUrl) {
+        var request = new XMLHttpRequest();
+        request.open("GET", fileUrl, false);
+        request.send(null);
+        return request.responseText;
     }
 
     ToolBar {
@@ -184,79 +195,6 @@ ApplicationWindow {
             Column{
                 id: filesColumn
                 width: parent.width
-
-                Repeater {
-                    id: filesRepeater
-                    model: 25
-                    delegate:Item {
-                        width: parent.width
-                        height: 50
-
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-
-                            RowLayout{
-                                anchors.fill: parent
-
-                                Item {
-                                    height: parent.height
-                                    width: 10
-                                }
-
-                                Button {
-                                    objectName: "fileName" + index
-                                    height: parent.height
-                                    //width: text.length > 15 ? parent.width - 30 - 2 * height : undefined
-                                    Layout.fillWidth: true
-                                    flat: true
-                                    font.capitalization: Font.MixedCase
-
-                                    Text {
-                                        anchors.fill: parent
-                                        text: "filename" + index
-                                        verticalAlignment: Text.AlignVCenter
-                                        horizontalAlignment: Text.AlignLeft
-                                        padding: 5
-                                        elide: parent.parent.parent.containsMouse ? Text.ElideLeft : Text.ElideNone
-                                    }
-
-                                }
-
-                                ToolButton {
-                                    objectName: "saveFile" + index
-                                    height: parent.height
-                                    width: height
-                                    opacity: parent.parent.containsMouse ? 1 : 0
-                                    Image{
-                                        anchors.fill: parent
-                                        scale: 0.5
-                                        source: "img/save.png"
-                                    }
-                                }
-                                ToolButton {
-                                    objectName: "closeFile" + index
-                                    height: parent.height
-                                    width: height
-                                    opacity: parent.parent.containsMouse ? 1 : 0
-                                    Image{
-                                        anchors.fill: parent
-                                        scale: 0.5
-                                        source: "img/close.png"
-                                    }
-                                }
-                                Item {
-                                    height: parent.height
-                                    width: 10
-                                }
-                            }
-                        }
-                    }
-                }
-                Item{
-                    width: parent.width
-                    height: 30
-                }
                 Row{
                     width: parent.width
                     height: 50
@@ -264,6 +202,7 @@ ApplicationWindow {
 
                     TextField {
                         padding: 5
+                        id: filepath
                         objectName: "filepath"
                         placeholderText: "filepath"
                         width: parent.width - 30 - 2 * height
@@ -281,6 +220,7 @@ ApplicationWindow {
                             scale: 0.5
                             source: "img/add.png"
                         }
+                        onClicked: qmlBridge.sendToGo(this.objectName, "add", filepath.text)
                     }
                     ToolButton {
                         objectName: "openFile"
@@ -297,6 +237,10 @@ ApplicationWindow {
                     width: parent.width
                     height: 30
                 }
+            }
+            Item{
+                width: parent.width
+                height: 30
             }
 
             ScrollIndicator.vertical: ScrollIndicator{}

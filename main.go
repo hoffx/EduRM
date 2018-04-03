@@ -5,6 +5,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/hoffx/EduRM/filemanager"
+	"github.com/hoffx/EduRM/interpreter"
+
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/qml"
@@ -15,12 +18,14 @@ import (
 type QmlBridge struct {
 	core.QObject
 
-	_ func(target, action, data string) `signal:"sendToQml"`
-	_ func(source, action, data string) `slot:"sendToGo"`
+	_ func(target, action, datacontent string) `signal:"sendToQml"`
+	_ func(source, action, datacontent string) `slot:"sendToGo"`
 }
 
-var qmlBridge *QmlBridge
-var root *core.QObject
+var (
+	qmlBridge *QmlBridge
+	root      *core.QObject
+)
 
 func main() {
 
@@ -52,16 +57,17 @@ func main() {
 	gui.QGuiApplication_Exec()
 }
 
-func interpretQmlCommand(source, action, data string) {
-	log.Println(source + action + data)
+func interpretQmlCommand(source, action, datacontent string) {
+	log.Println(source + action + datacontent)
 
-	/*switch source {
-	case :
+	switch source {
+	case ToolButton_AddFileFromFilepath:
 		switch action {
-		case :
+		case "add":
+			addFileToSystem(datacontent)
 
 		}
-	}*/
+	}
 }
 
 func doBackgroundTasks() {
@@ -77,4 +83,22 @@ func doBackgroundTasks() {
 		}
 	}
 
+}
+
+func pushNotification(notification interpreter.Notification) {
+
+}
+
+func addFileToSystem(path string) {
+	err := filemanager.AddFile(path)
+	if err != nil {
+		pushNotification(interpreter.Notification{
+			Type:        interpreter.Error,
+			Content:     err.Error(),
+			Instruction: -1,
+		})
+	} else {
+		//data, _ := json.Marshal(*filemanager.Current())
+		qmlBridge.SendToQml(General_Filemanagement, "add", filemanager.Current().Name())
+	}
 }
