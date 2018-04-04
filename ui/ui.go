@@ -73,6 +73,7 @@ func addFileToSystem(source, jsondata string) {
 		})
 	} else {
 		qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, hermes.BuildAddModeJSON("filelistitem.qml", "name", "'"+filemanager.Current().Name()+"'"))
+		// TODO: remove this testlines
 		//qbController.SendToQml(hermes.ModeSet, Text_CurrentCmd, `{"text":"`+filemanager.Current().Name()+`"}`)
 		//qbController.SendToQml(hermes.ModeRemove, "filesColumn", "")
 	}

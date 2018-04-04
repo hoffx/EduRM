@@ -14,10 +14,10 @@ ApplicationWindow {
     Connections
     {
         property var idMap: ({
-                             filesColumn:filesColumn,
-                             currentCmdTextBinding:currentCmdTextBinding
-                         })
-        target: qmlBridge
+                                filesColumn:filesColumn,
+                                currentCmdTextBinding:currentCmdTextBinding
+                            })
+        target: hermes
         onSendToQml:
         {
             var data = ""
@@ -38,7 +38,11 @@ ApplicationWindow {
                 Qt.createQmlObject(qmlElement, this.idMap[target], target + "_ChildTemplate")
                 break;
             case 2:
-                var template = openFile(data.template)
+                // open file
+                var request = new XMLHttpRequest();
+                request.open("GET", data.template, false);
+                request.send(null);
+                var template = request.responseText;
                 var qmlElement = template.replace(/<\w+>/i, function(match){
                     return data.variables[match.replace("<","").replace(">","")]
                 })
@@ -49,13 +53,6 @@ ApplicationWindow {
                 break;
             }
         }
-    }
-
-    function openFile(fileUrl) {
-        var request = new XMLHttpRequest();
-        request.open("GET", fileUrl, false);
-        request.send(null);
-        return request.responseText;
     }
 
     ToolBar {
@@ -81,7 +78,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/load.png"
                 }
-                onClicked: qmlBridge.sendToGo(this.objectName, "click", "reload")                
+                onClicked: hermes.sendToGo(this.objectName, "click", "reload")                
             }
             ToolButton {
                 id: runButton
@@ -235,7 +232,7 @@ ApplicationWindow {
                             scale: 0.5
                             source: "img/add.png"
                         }
-                        onClicked: qmlBridge.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
+                        onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
                     }
                     ToolButton {
                         objectName: "openFile"
