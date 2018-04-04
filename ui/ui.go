@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/hoffx/EduRM/filemanager"
-	"github.com/hoffx/EduRM/hermes"
 	"github.com/hoffx/EduRM/interpreter"
+	"github.com/hoffx/hermes"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -72,7 +72,7 @@ func addFileToSystem(source, jsondata string) {
 			Instruction: -1,
 		})
 	} else {
-		qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, `{"template": "filelistitem.qml", "variables":{"name": "'`+filemanager.Current().Name()+`'"}}`)
+		qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, hermes.BuildAddModeJSON("filelistitem.qml", "name", "'"+filemanager.Current().Name()+"'"))
 		//qbController.SendToQml(hermes.ModeSet, Text_CurrentCmd, `{"text":"`+filemanager.Current().Name()+`"}`)
 		//qbController.SendToQml(hermes.ModeRemove, "filesColumn", "")
 	}
