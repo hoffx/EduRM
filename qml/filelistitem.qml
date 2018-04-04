@@ -1,9 +1,9 @@
 import QtQuick 2.7
-    import QtQuick.Window 2.2
-    import QtQuick.Controls 2.1
-    import QtQuick.Layouts 1.3
+import QtQuick.Window 2.2
+import QtQuick.Controls 2.1
+import QtQuick.Layouts 1.3
 
-    Item {
+Item {
     width: parent.width
     height: 50
 
@@ -27,7 +27,7 @@ import QtQuick 2.7
 
                 Text {
                     anchors.fill: parent
-                    text: datacontent
+                    text: <name>
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignLeft
                     padding: 5
@@ -35,7 +35,6 @@ import QtQuick 2.7
                 }
 
             }
-
             ToolButton {
                 height: parent.height
                 width: height

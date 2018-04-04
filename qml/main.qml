@@ -13,32 +13,39 @@ ApplicationWindow {
 
     Connections
     {
+        property var idMap: ({
+                             filesColumn:filesColumn,
+                             currentCmdTextBinding:currentCmdTextBinding
+                         })
         target: qmlBridge
         onSendToQml:
         {
-            switch(target) {
-            case "topToolBar.Row2.currentCmdText":
-                switch(action) {
-                case "write":
-                    currentCmdText.text = datacontent
-                    break;
-                case "delete":
-                    currentCmdText.text = ""
-                    break;
-                default:
-                    currentCmdText.text = ""
-                    break;
+            var data = ""
+            if (jsondata != "") {
+                data = JSON.parse(jsondata)
+            }
+            switch(mode) {
+            case 0:
+                for(var key in data) {
+                    this.idMap[target].property = key.toString()
+                    this.idMap[target].value = data[key.toString()]
                 }
                 break;
-            case "filemanagement":
-                switch(action) {
-                case "add":
-                    filepath.text = ""
-                    Qt.createQmlObject(openFile('filelistitem.qml').replace("datacontent", '"' + datacontent + '"'), filesColumn, 'filelistitem.qml')
-                }
+            case 1:
+                var qmlElement = data.template.replace(/<\w+>/i, function(match){
+                    return data.variables[match.replace("<","").replace(">","")]
+                })
+                Qt.createQmlObject(qmlElement, this.idMap[target], target + "_ChildTemplate")
                 break;
-            default:
-                currentCmdText.text = ""
+            case 2:
+                var template = openFile(data.template)
+                var qmlElement = template.replace(/<\w+>/i, function(match){
+                    return data.variables[match.replace("<","").replace(">","")]
+                })
+                Qt.createQmlObject(qmlElement, this.idMap[target], data.template)
+                break;
+            case 3:
+                this.idMap[target].destroy()
                 break;
             }
         }
@@ -105,7 +112,7 @@ ApplicationWindow {
                 Image{
                     anchors.fill: parent
                     scale: 0.5
-                    source: "img/stop.png"
+                    source: 'img/stop.png'
                 }
             }
             Item {
@@ -163,6 +170,13 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 18
+
+                Binding{
+                    id: currentCmdTextBinding
+                    target: currentCmdText
+                    property: "text"
+                    value: "baum"
+                }
             }
         }
         Text {
@@ -212,6 +226,7 @@ ApplicationWindow {
                         font.pointSize: 14
                     }
                     ToolButton {
+                        id: addFileFromFilepath
                         objectName: "addFileFromFilepath"
                         height: parent.height
                         width: height
@@ -220,7 +235,7 @@ ApplicationWindow {
                             scale: 0.5
                             source: "img/add.png"
                         }
-                        onClicked: qmlBridge.sendToGo(this.objectName, "add", filepath.text)
+                        onClicked: qmlBridge.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
                     }
                     ToolButton {
                         objectName: "openFile"
