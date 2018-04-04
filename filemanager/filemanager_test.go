@@ -12,7 +12,7 @@ func TestAddingFiles(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = filemanager.AddFile("../controller/test.txt")
+	err = filemanager.AddFile("file:///Volumes/Data/themomax/Development/go/src/github.com/hoffx/EduRM/test.txt")
 	if err != nil {
 		t.Error(err)
 	}
@@ -20,7 +20,7 @@ func TestAddingFiles(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = filemanager.AddFile("../test.txt")
+	err = filemanager.AddFile("../controller/test.txt")
 	if err != nil {
 		t.Error(err)
 	}

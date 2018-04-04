@@ -26,11 +26,12 @@ func init() {
 // AddFile loads the file from the given path
 // and sets it as the currently opened file
 func AddFile(path string) (err error) {
+	path = strings.TrimPrefix(path, "file:")
+	path = filepath.Clean(path)
 	path, err = filepath.Abs(path)
 	if err != nil {
 		return
 	}
-	path = filepath.Clean(path)
 	path = filepath.ToSlash(path)
 	text, err := ioutil.ReadFile(path)
 	if err != nil {
