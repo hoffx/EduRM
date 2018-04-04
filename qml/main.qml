@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.0
 ApplicationWindow {
     id: window
     visible: true
@@ -243,6 +244,9 @@ ApplicationWindow {
                             scale: 0.5
                             source: "img/open.png"
                         }
+
+                        onClicked: fileDialog.open()
+
                     }
                 }
                 Item{
@@ -428,5 +432,22 @@ ApplicationWindow {
            }
 
        }
+   }
+
+   FileDialog {
+       id: fileDialog
+       visible: false
+       //modality: fileDialogModal.checked ? Qt.WindowModal : Qt.NonModal
+       title: qsTr("Select your assembly file")
+       //selectExisting: fileDialogSelectExisting.checked
+       selectMultiple: false
+       selectFolder: false
+       nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
+       selectedNameFilter: "Assembly Files (*.asm *.spaen)"
+       sidebarVisible: true
+       onAccepted: {
+           hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '" }')
+       }
+       onRejected: {}
    }
 }

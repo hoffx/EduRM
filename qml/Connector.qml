@@ -6,7 +6,7 @@ Connections
                             filesColumn:filesColumn,
                             currentCmdTextBinding:currentCmdTextBinding
                         })
-    target: qmlBridge
+    target: hermes
     onSendToQml:
     {
         var data = ""
