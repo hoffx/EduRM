@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"time"
 
 	"github.com/hoffx/EduRM/filemanager"
 	"github.com/hoffx/EduRM/interpreter"
@@ -72,9 +73,12 @@ func addFileToSystem(source, jsondata string) {
 			Instruction: -1,
 		})
 	} else {
-		qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, hermes.BuildAddModeJSON("filelistitem.qml", "name", "'"+filemanager.Current().Name()+"'"))
+		qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, hermes.BuildAddModeJSON("filelistitem.qml", "name", "'"+filemanager.Current().Name()+"'", "id", "file1", "textfieldid", "file1text", "textbindingid", "file1binding"))
 		// TODO: remove this testlines
 		//qbController.SendToQml(hermes.ModeSet, Text_CurrentCmd, `{"text":"`+filemanager.Current().Name()+`"}`)
-		//qbController.SendToQml(hermes.ModeRemove, "filesColumn", "")
+		time.Sleep(time.Second)
+		qbController.SetInQml("file1binding", hermes.BuildSetModeJSON("text", "'tree'"))
+		// qbController.RemoveFromQml("file1text")
+		//qbController.RemoveEventListener("file1")
 	}
 }

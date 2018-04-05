@@ -6,6 +6,7 @@ import QtQuick.Layouts 1.3
 Item {
     width: parent.width
     height: 50
+    id: <id>
 
     MouseArea {
         anchors.fill: parent
@@ -27,11 +28,17 @@ Item {
 
                 Text {
                     anchors.fill: parent
+                    id: <textfieldid>
                     text: <name>
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignLeft
                     padding: 5
                     elide: parent.parent.parent.containsMouse ? Text.ElideLeft : Text.ElideNone
+                    Binding {
+                        id: <textbindingid>
+                        target: <textfieldid>
+                        property: "objectName"
+                    }
                 }
 
             }
