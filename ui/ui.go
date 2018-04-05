@@ -39,10 +39,16 @@ func Run() {
 
 	qbController = hermes.NewBridgeController(engine)
 	qbController.AddEventListener(Event_AddFile, addFileToSystem)
+	qbController.AddEventListener("read", receivePropertyInfo)
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
 	root = window.Create(engine.RootContext())
+
+	go func() {
+		time.Sleep(time.Second)
+		qbController.ReadQml("kevin", hermes.BuildReadModeJSON("read", "filename"))
+	}()
 
 	// Execute app
 	gui.QGuiApplication_Exec()
@@ -50,6 +56,10 @@ func Run() {
 
 func pushNotification(notification interpreter.Notification) {
 	log.Println(notification.Content)
+}
+
+func receivePropertyInfo(source, jsondata string) {
+	log.Println(jsondata)
 }
 
 func addFileToSystem(source, jsondata string) {
@@ -73,12 +83,12 @@ func addFileToSystem(source, jsondata string) {
 			Instruction: -1,
 		})
 	} else {
-		qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, hermes.BuildAddModeJSON("filelistitem.qml", "name", "'"+filemanager.Current().Name()+"'", "id", "file1", "textfieldid", "file1text", "textbindingid", "file1binding"))
+		qbController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file1", "filename", "'"+filemanager.Current().Name()+"'"))
+		//qbController.SendToQml(hermes.ModeAddFromFile, Column_FileList, hermes.BuildAddModeJSON("filelistitem.qml", "name", "'"+filemanager.Current().Name()+"'", "id", "file"+filemanager.Current().Name(), "filename", filemanager.Current().Name()))
 		// TODO: remove this testlines
 		//qbController.SendToQml(hermes.ModeSet, Text_CurrentCmd, `{"text":"`+filemanager.Current().Name()+`"}`)
 		time.Sleep(time.Second)
-		qbController.SetInQml("file1binding", hermes.BuildSetModeJSON("text", "'tree'"))
-		// qbController.RemoveFromQml("file1text")
-		//qbController.RemoveEventListener("file1")
+		qbController.SetInQml("file1", hermes.BuildSetModeJSON("filename", "'tree'"))
+		qbController.RemoveFromQml("sliderText")
 	}
 }

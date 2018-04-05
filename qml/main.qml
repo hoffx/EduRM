@@ -15,8 +15,14 @@ ApplicationWindow {
     Connections
     {
         property var idMap: ({
-                                filesColumn:filesColumn,
-                                currentCmdTextBinding:currentCmdTextBinding
+                                // -------------------------------------------
+                                // List all the ids here, you have to access
+                                // from Go. This is needed for
+                                // string to object mapping.
+                                // -------------------------------------------
+                                window:window,
+                                sliderText:sliderText,
+                                filesColumn:filesColumn
                             })
         target: hermes
         onSendToQml:
@@ -27,11 +33,8 @@ ApplicationWindow {
             }
             switch(mode) {
             case 0:
-                console.log(target)
-                console.log(this.idMap[target])
                 for(var key in data) {
-                    this.idMap[target].property = key.toString()
-                    this.idMap[target].value = data[key.toString()]
+                    this.idMap[target][key.toString()] = data[key.toString()]
                 }
                 break;
             case 1:
@@ -47,6 +50,19 @@ ApplicationWindow {
                 break;
             case 3:
                 this.idMap[target].destroy()
+                delete this.idMap[target]
+                break;
+            case 4:
+                var request = {}
+                for (var i = 0; i < data.properties.length; i++){
+                    request[data.properties[i]] = this.idMap[target][data.properties[i]]
+                }
+                hermes.sendToGo(data.eventListener, target, JSON.stringify(request))
+                break;
+            default:
+                // -------------------------------------------
+                // Insert your ModeCustom-implementation here.
+                // -------------------------------------------
                 break;
             }
         }
@@ -67,8 +83,8 @@ ApplicationWindow {
         }
     }
 
+
     ToolBar {
-        objectName: "topToolBar"
         id: toolBar
         position: ToolBar.Header
         height: 50
@@ -77,20 +93,18 @@ ApplicationWindow {
         anchors.top: parent.top
 
         Row {
-            objectName: "topToolBar.Row"
             anchors.leftMargin: 10
             anchors.left: parent.left
             height: parent.height
             width: parent.width * .7
             ToolButton {
-                objectName: "topToolBar.Row.loadButton"
                 id: loadButton
                 Image{
                     anchors.fill: parent
                     scale: 0.5
                     source: "img/load.png"
                 }
-                onClicked: hermes.sendToGo(this.objectName, "click", "reload")                
+                onClicked: hermes.sendToGo("reload","loadButton","")                
             }
             ToolButton {
                 id: runButton
@@ -133,7 +147,6 @@ ApplicationWindow {
                 width: 100
             }
             Text {
-                objectName: "topToolBar.Row.sliderText"
                 height: parent.height
                 id: sliderText
                 text: (speedSlider.value * 5).toLocaleString(Qt.locale("en_US"), "f",1) + " s"
@@ -144,7 +157,6 @@ ApplicationWindow {
             }            
         }
         Row {
-            objectName: "topToolBar.Row2"
             anchors.right: parent.right
             height: parent.height
             width: parent.width * .3
@@ -170,7 +182,6 @@ ApplicationWindow {
             }
             Text {
                 padding: 5
-                objectName: "topToolBar.Row2.currentCmdText"
                 id: currentCmdText
                 //text: qsTr("LOAD 4")
                 height: parent.height
@@ -202,7 +213,7 @@ ApplicationWindow {
         }
     }
 
-   Row {
+    Row {
         anchors.topMargin: toolBar.height
         anchors.fill: parent
         anchors.bottomMargin: bpBar.height
@@ -226,7 +237,6 @@ ApplicationWindow {
                     TextField {
                         padding: 5
                         id: filepath
-                        objectName: "filepath"
                         placeholderText: "filepath"
                         width: parent.width - 30 - 2 * height
                         height: parent.height
@@ -236,7 +246,6 @@ ApplicationWindow {
                     }
                     ToolButton {
                         id: addFileFromFilepath
-                        objectName: "addFileFromFilepath"
                         height: parent.height
                         width: height
                         Image{
@@ -247,7 +256,6 @@ ApplicationWindow {
                         onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
                     }
                     ToolButton {
-                        objectName: "openFile"
                         height: parent.height
                         width: height
                         Image{
@@ -283,7 +291,6 @@ ApplicationWindow {
 
 
             TextArea.flickable: TextArea {
-                objectName: "BodyRow.TextArea"
                 font.pointSize: 13
                 width: parent.parent.width
                 height: parent.parent.height
@@ -321,12 +328,10 @@ ApplicationWindow {
 
             flickableDirection: Flickable.VerticalFlick
             Grid {
-                objectName: "body.registerGrid"
                 id: registerGrid
                 columns: width / 85
                 width: parent.width
                 Repeater {
-                    objectName: "body.registerGrid.Repeater"
                     id: registerRepeater
                     model: 99
                     delegate: Column{
@@ -335,7 +340,6 @@ ApplicationWindow {
 
                         Text {
                             color: "#3f51b5"
-                            objectName: "registerName" + index
                             width: parent.width
                             height: 3 * parent.height / 5
                             text: "R"+index
@@ -344,7 +348,6 @@ ApplicationWindow {
                             padding: 5
                         }
                         Text {
-                            objectName: "register" + index
                             width: parent.width
                             height: 2 * parent.height / 5
                             text: index
@@ -363,70 +366,66 @@ ApplicationWindow {
 
 
 
-   ToolBar {
-       id: bpBar
-       position: ToolBar.Footer
-       height: 50
-       anchors.left: parent.left
-       anchors.bottom: parent.bottom
-       anchors.right: parent.right
+    ToolBar {
+        id: bpBar
+        position: ToolBar.Footer
+        height: 50
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
 
-       Row{
-           anchors.fill: parent
-           anchors.leftMargin: 10
-           anchors.rightMargin: 10
+        Row{
+            anchors.fill: parent
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
 
-           Switch {
-               id: bpSwitch
-               objectName: "bpSwitch"
-               scale: 0.8
-               checked: true
-               height: parent.height
-           }
-           Item {
-               height: parent.height
-               width: 40
-           }
-           TextField {
-               objectName: "bpInput"
-               id: bpInput
-               height: parent.height
-               verticalAlignment: Text.AlignVCenter
-               color: "#ffffff"
-               validator: IntValidator{bottom: 1;}
-               placeholderText: "instruction counter"
+            Switch {
+                id: bpSwitch
+                scale: 0.8
+                checked: true
+                height: parent.height
+            }
+            Item {
+                height: parent.height
+                width: 40
+            }
+            TextField {
+                id: bpInput
+                height: parent.height
+                verticalAlignment: Text.AlignVCenter
+                color: "#ffffff"
+                validator: IntValidator{bottom: 1;}
+                placeholderText: "instruction counter"
+            }
+            ToolButton {
+                height: parent.height
+                width: height
+                Image{
+                    anchors.fill: parent
+                    scale: 0.5
+                    source: "img/add.png"
+                }
+            }
+            Item {
+                height: parent.height
+                width: 40
+            }
+            Flickable {
+                clip: true
+                width: parent.width - 80 - parent.height - bpInput.width - bpSwitch.width - 10
+                height: parent.height
+                boundsBehavior: Flickable.StopAtBounds
+                contentWidth: bpList.implicitWidth
+                flickableDirection: Flickable.HorizontalFlick
 
-           }
-           ToolButton {
-               objectName: "addBreakPoint"
-               height: parent.height
-               width: height
-               Image{
-                   anchors.fill: parent
-                   scale: 0.5
-                   source: "img/add.png"
-               }
-           }
-           Item {
-               height: parent.height
-               width: 40
-           }
-           Flickable {
-               clip: true
-               width: parent.width - 80 - parent.height - bpInput.width - bpSwitch.width - 10
-               height: parent.height
-               boundsBehavior: Flickable.StopAtBounds
-               contentWidth: bpList.implicitWidth
-               flickableDirection: Flickable.HorizontalFlick
-
-               Row {
-                   id: bpList
-                   height: parent.height
-                   Repeater {
-                       height: parent.height
-                       id: bpRepeater
-                       model: 20
-                       delegate: ToolButton{
+                Row {
+                    id: bpList
+                    height: parent.height
+                    Repeater {
+                        height: parent.height
+                        id: bpRepeater
+                        model: 20
+                        delegate: ToolButton{
                             height: parent.height
 
                             contentItem: Text {
@@ -437,28 +436,28 @@ ApplicationWindow {
                                 color: parent.hovered ? "#e91e63" : "#ffffff"
                             }
 
-                       }
-                   }
-               }
-           }
+                        }
+                    }
+                }
+            }
 
-       }
-   }
+        }
+    }
 
-   FileDialog {
-       id: fileDialog
-       visible: false
-       //modality: fileDialogModal.checked ? Qt.WindowModal : Qt.NonModal
-       title: qsTr("Select your assembly file")
-       //selectExisting: fileDialogSelectExisting.checked
-       selectMultiple: false
-       selectFolder: false
-       nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
-       selectedNameFilter: "Assembly Files (*.asm *.spaen)"
-       sidebarVisible: true
-       onAccepted: {
-           hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '" }')
-       }
-       onRejected: {}
-   }
+    FileDialog {
+        id: fileDialog
+        visible: false
+        //modality: fileDialogModal.checked ? Qt.WindowModal : Qt.NonModal
+        title: qsTr("Select your assembly file")
+        //selectExisting: fileDialogSelectExisting.checked
+        selectMultiple: false
+        selectFolder: false
+        nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
+        selectedNameFilter: "Assembly Files (*.asm *.spaen)"
+        sidebarVisible: true
+        onAccepted: {
+            hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '" }')
+        }
+        onRejected: {}
+    }
 }
