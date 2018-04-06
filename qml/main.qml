@@ -22,7 +22,9 @@ ApplicationWindow {
                                 // -------------------------------------------
                                 window:window,
                                 sliderText:sliderText,
-                                filesColumn:filesColumn
+                                filesColumn:filesColumn,
+                                filepath:filepath,
+                                textEdit:textEdit
                             })
         target: hermes
         onSendToQml:
@@ -30,6 +32,12 @@ ApplicationWindow {
             var data = ""
             if (jsondata != "") {
                 data = JSON.parse(jsondata)
+                for (var key in data) {
+                    if (data[key.toString()].toString().includes("\\n")) {
+                        data[key.toString()] = data[key.toString()].toString().replace(/\\r\\n/g, "\r\n")
+                        data[key.toString()] = data[key.toString()].toString().replace(/\\n/g, "\n")
+                    }
+                }
             }
             switch(mode) {
             case 0:
@@ -74,7 +82,6 @@ ApplicationWindow {
             // get element id
             var elementId = ""
             qmlElement = qmlElement.replace(/{[^{]*(id\s*:\s*[^\s^;.]+)/i, function(match, p1){
-                console.log("id: "+p1)
                 elementId = p1.replace(/\s+/g, "").replace("id:","")
                 return match
             })
@@ -291,12 +298,12 @@ ApplicationWindow {
 
 
             TextArea.flickable: TextArea {
+                id: textEdit
                 font.pointSize: 13
                 width: parent.parent.width
                 height: parent.parent.height
                 selectByMouse: true
                 selectByKeyboard: true
-                id: textEdit
                 focus: true
                 wrapMode: TextArea.Wrap
                 padding: 15

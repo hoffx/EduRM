@@ -1,4 +1,5 @@
 Filelistitem {
     id: <id>
-    filename: <filename>
+    filename: "<filename>"
+    idtext: "<id>"
 }

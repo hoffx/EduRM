@@ -4,5 +4,6 @@ package ui
 const (
 	ToolButton_AddFileFromFilepath string = "addFileFromFilepath"
 	Column_FileList                string = "filesColumn"
-	Text_CurrentCmd                string = "currentCmdTextBinding"
+	TextField_FilePath             string = "filepath"
+	TextArea_FileContent           string = "textEdit"
 )

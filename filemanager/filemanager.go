@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/hoffx/EduRM/script"
 )
 
 // filemanager errors
@@ -85,13 +87,8 @@ func AddFile(path string) (err error) {
 
 	}
 
-	files[name] = &File{
-		name:        name,
-		path:        path,
-		script:      nil,
-		text:        string(text),
-		breakpoints: make(map[uint]bool, 0),
-	}
+	files[name] = NewFile(name, path, string(text), &script.Script{}, make(map[uint]bool, 0))
+
 	current = name
 	return
 }
@@ -108,6 +105,35 @@ func Current() *File {
 // GetByName returns the file connected to the given identifier
 func GetByName(name string) *File {
 	return files[name]
+}
+
+// GetByID returns the file connected to the given identifier
+func GetByID(id string) *File {
+	for _, f := range files {
+		if f.id == id {
+			return f
+		}
+	}
+	return nil
+}
+
+// GetByPath returns the file connected to the given identifier
+// The path needn't have the same format as the path the file
+// was created with
+func GetByPath(path string) *File {
+	path = strings.TrimPrefix(path, "file:")
+	path = filepath.Clean(path)
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return nil
+	}
+	path = filepath.ToSlash(path)
+	for _, f := range files {
+		if f.path == path {
+			return f
+		}
+	}
+	return nil
 }
 
 // GetAll returns a map of all files. The key is the file's name

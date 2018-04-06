@@ -7,6 +7,7 @@ Item {
     width: parent.width
     height: 50
     property string filename: ""
+    property string idtext: ""
 
     MouseArea {
         anchors.fill: parent
@@ -34,7 +35,7 @@ Item {
                     padding: 5
                     elide: parent.parent.parent.containsMouse ? Text.ElideLeft : Text.ElideNone
                 }
-
+                onClicked: hermes.sendToGo("event_showfile", idtext, "")
             }
             ToolButton {
                 height: parent.height
@@ -45,6 +46,7 @@ Item {
                     scale: 0.5
                     source: "img/save.png"
                 }
+                onClicked: hermes.sendToGo("event_savefile", idtext, '{"text":"'+textEdit.text+'"}')
             }
             ToolButton {
                 height: parent.height
@@ -55,6 +57,7 @@ Item {
                     scale: 0.5
                     source: "img/close.png"
                 }
+                onClicked: hermes.sendToGo("event_removefile", idtext, "")
             }
             Item {
                 height: parent.height
