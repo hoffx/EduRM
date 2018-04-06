@@ -24,7 +24,9 @@ ApplicationWindow {
                                 sliderText:sliderText,
                                 filesColumn:filesColumn,
                                 filepath:filepath,
-                                textEdit:textEdit
+                                textEdit:textEdit,
+                                bpList:bpList,
+                                bpInput:bpInput
                             })
         target: hermes
         onSendToQml:
@@ -190,20 +192,13 @@ ApplicationWindow {
             Text {
                 padding: 5
                 id: currentCmdText
-                //text: qsTr("LOAD 4")
+                text: qsTr("LOAD 4")
                 height: parent.height
                 color: "#ffffff"
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 18
-
-                Binding{
-                    id: currentCmdTextBinding
-                    target: currentCmdText
-                    property: "text"
-                    value: "baum"
-                }
             }
         }
         Text {
@@ -248,6 +243,7 @@ ApplicationWindow {
                         width: parent.width - 30 - 2 * height
                         height: parent.height
                         verticalAlignment: Text.AlignVCenter
+                        selectByMouse: true
                         layer.enabled: true
                         font.pointSize: 14
                     }
@@ -309,7 +305,6 @@ ApplicationWindow {
                 padding: 15
                 background: null
                 font.family: "Menlo, Monaco, 'Courier New', monospace"
-                text: "baum"
 
                 MouseArea {
                     enabled: false
@@ -412,6 +407,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/add.png"
                 }
+                onClicked: hermes.sendToGo("event_addbreakpoint", "", '{"instructioncounter":"' + bpInput.text + '"}')
             }
             Item {
                 height: parent.height
@@ -428,23 +424,6 @@ ApplicationWindow {
                 Row {
                     id: bpList
                     height: parent.height
-                    Repeater {
-                        height: parent.height
-                        id: bpRepeater
-                        model: 20
-                        delegate: ToolButton{
-                            height: parent.height
-
-                            contentItem: Text {
-                                text: "Breakpoint" + index
-                                height: parent.height
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                                color: parent.hovered ? "#e91e63" : "#ffffff"
-                            }
-
-                        }
-                    }
                 }
             }
 

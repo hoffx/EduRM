@@ -6,4 +6,6 @@ const (
 	Column_FileList                string = "filesColumn"
 	TextField_FilePath             string = "filepath"
 	TextArea_FileContent           string = "textEdit"
+	Row_Breakpoints                string = "bpList"
+	TextField_BreakpointIC         string = "bpInput"
 )

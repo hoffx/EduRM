@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hoffx/EduRM/filemanager"
@@ -50,7 +51,8 @@ func Run() {
 	hController.AddEventListener(Event_SaveFile, saveFile)
 	hController.AddEventListener(Event_StoreFileContent, storeFileContent)
 	hController.AddEventListener(Event_ShowFile, showFile)
-	hController.AddEventListener("read", receivePropertyInfo)
+	hController.AddEventListener(Event_AddBreakpoint, addBreakpoint)
+	hController.AddEventListener(Event_RemoveBreakpoint, removeBreakpoint)
 	hermes.DoLog = true
 
 	// Load the main qml file
@@ -61,7 +63,7 @@ func Run() {
 	gui.QGuiApplication_Exec()
 }
 
-// filesystem event listeners:
+// event listeners:
 
 func receivePropertyInfo(source, jsondata string) {
 	log.Println(jsondata)
@@ -81,6 +83,9 @@ func addFileToSystem(source, jsondata string) {
 		})
 	}
 	storeFileContent("", "")
+	if filemanager.Current() != nil {
+		deleteAllBreakpoints(filemanager.Current().Breakpoints())
+	}
 	err = filemanager.AddFile(fi.Path)
 	if err != nil {
 		pushNotification(interpreter.Notification{
@@ -116,8 +121,12 @@ func showFile(source, jsondata string) {
 		fileToShow = id
 		hController.ReadQml(TextArea_FileContent, hermes.BuildReadModeJSON(Event_ShowFile, "text"))
 	} else {
-		// set file content
-		filemanager.Current().SetText(regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n"))
+		// set the old file's content and delete its breakpoints
+		if filemanager.Current() != nil {
+			filemanager.Current().SetText(regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n"))
+			deleteAllBreakpoints(filemanager.Current().Breakpoints())
+		}
+
 		displayFile(fileToShow)
 	}
 
@@ -125,10 +134,11 @@ func showFile(source, jsondata string) {
 
 func removeFile(source, jsondata string) {
 	file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
+
 	if file != nil {
 		filemanager.Remove(file.Name())
+		deleteAllBreakpoints(file.Breakpoints())
 	}
-	hController.RemoveFromQml(source)
 	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", ""))
 }
 
@@ -187,12 +197,57 @@ func storeFileContent(source, jsondata string) {
 	}
 }
 
-// help functions:
+func addBreakpoint(source, jsondata string) {
+	type Breakpoint struct {
+		InstructionCounter string `json:"instructioncounter"`
+	}
+	var bp Breakpoint
+	err := json.Unmarshal([]byte(jsondata), &bp)
+	if err == nil {
+		if filemanager.Current() != nil {
+			ic, err := strconv.Atoi(bp.InstructionCounter)
+			if err == nil {
+				filemanager.Current().AddBreakpoint(uint(ic))
+				displayBreakpoint(uint(ic))
+				hController.SetInQml(TextField_BreakpointIC, hermes.BuildSetModeJSON("text", ""))
+			}
+		}
+	}
+}
+
+func removeBreakpoint(source, jsondata string) {
+	ic, err := strconv.Atoi(strings.TrimPrefix(source, "breakpoint"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if filemanager.Current() != nil {
+		filemanager.Current().DeleteBreakpoint(uint(ic))
+	}
+	hController.RemoveFromQml(source)
+}
+
+// helper functions:
+
+func displayBreakpoint(ic uint) {
+	bpString := strconv.Itoa(int(ic))
+	hController.AddToQmlFromFile(Row_Breakpoints, hermes.BuildAddModeJSON("tmplBreakpoint.qml", "id", "breakpoint"+bpString, "idtext", "breakpoint"+bpString, "buttontext", bpString))
+}
 
 func displayFile(id string) {
-	// set textarea content to current file text
+	// set current file to requested id
 	filemanager.SetCurrent(filemanager.GetByID(id).Name())
+	// set textarea content to current file text
 	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", filemanager.GetByID(id).Text()))
+	// load breakpoints
+	for bp := range filemanager.Current().Breakpoints() {
+		displayBreakpoint(bp)
+	}
+}
+
+func deleteAllBreakpoints(bp map[uint]bool) {
+	for ic := range bp {
+		hController.RemoveFromQml("breakpoint" + strconv.Itoa(int(ic)))
+	}
 }
 
 func pushNotification(notification interpreter.Notification) {

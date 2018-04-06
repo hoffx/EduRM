@@ -46,7 +46,19 @@ func (f *File) Save() (err error) {
 	return ioutil.WriteFile(f.path, []byte(f.text), os.ModePerm)
 }
 
-func (f *File) SetBreakpints(breakpoints map[uint]bool) { f.breakpoints = breakpoints }
+func (f *File) SetBreakpoints(breakpoints map[uint]bool) { f.breakpoints = breakpoints }
+
+func (f *File) AddBreakpoint(instructionCounter uint) {
+	if f.breakpoints != nil {
+		f.breakpoints[instructionCounter] = true
+	}
+}
+
+func (f *File) DeleteBreakpoint(instructionCounter uint) {
+	if f.breakpoints != nil {
+		delete(f.breakpoints, instructionCounter)
+	}
+}
 
 func (f *File) ParseFile() (err error) {
 	f.script, err = script.ParseFile(f.path)
