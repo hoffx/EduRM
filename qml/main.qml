@@ -237,8 +237,9 @@ ApplicationWindow {
                     padding: 15
 
                     TextField {
-                        padding: 5
                         id: filepath
+                        focus: true
+                        padding: 5
                         placeholderText: "filepath"
                         width: parent.width - 30 - 2 * height
                         height: parent.height
@@ -246,6 +247,9 @@ ApplicationWindow {
                         selectByMouse: true
                         layer.enabled: true
                         font.pointSize: 14
+                        Keys.onReturnPressed: {
+                            hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
+                        }
                     }
                     ToolButton {
                         id: addFileFromFilepath
@@ -300,7 +304,6 @@ ApplicationWindow {
                 height: parent.parent.height
                 selectByMouse: true
                 selectByKeyboard: true
-                focus: true
                 wrapMode: TextArea.Wrap
                 padding: 15
                 background: null
