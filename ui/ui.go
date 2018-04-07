@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hoffx/EduRM/controller"
 	"github.com/hoffx/EduRM/filemanager"
 	"github.com/hoffx/EduRM/interpreter"
 	"github.com/theMomax/hermes"
@@ -19,15 +20,16 @@ import (
 )
 
 var (
+	// ui
 	root        *core.QObject
 	hController *hermes.Controller
 
-	alphanumRegex *regexp.Regexp
+	// backend
+	c              *controller.Controller
+	registerAmount int = -1
+	delay          int
+	status         int
 )
-
-func init() {
-	alphanumRegex, _ = regexp.Compile("[^a-zA-Z0-9]+")
-}
 
 func Run() {
 
@@ -46,6 +48,7 @@ func Run() {
 	engine := qml.NewQQmlApplicationEngine(nil)
 
 	hController = hermes.NewBridgeController(engine)
+	hController.AddEventListener(Event_WindowLoaded, windowLoaded)
 	hController.AddEventListener(Event_AddFile, addFileToSystem)
 	hController.AddEventListener(Event_RemoveFile, removeFile)
 	hController.AddEventListener(Event_SaveFile, saveFile)
@@ -53,7 +56,14 @@ func Run() {
 	hController.AddEventListener(Event_ShowFile, showFile)
 	hController.AddEventListener(Event_AddBreakpoint, addBreakpoint)
 	hController.AddEventListener(Event_RemoveBreakpoint, removeBreakpoint)
-	hermes.DoLog = true
+	hController.AddEventListener(Event_AddRegister, addRegister)
+	hController.AddEventListener(Event_RemoveRegister, removeRegister)
+	hController.AddEventListener(Event_SliderMoved, sliderMoved)
+	hController.AddEventListener(Event_Reload, reload)
+	hController.AddEventListener(Event_Run, run)
+	hController.AddEventListener(Event_Step, step)
+	hController.AddEventListener(Event_Pause, pause)
+	hController.AddEventListener(Event_Stop, stop)
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
@@ -65,8 +75,10 @@ func Run() {
 
 // event listeners:
 
-func receivePropertyInfo(source, jsondata string) {
-	log.Println(jsondata)
+func windowLoaded(source, jsondata string) {
+	for i := registerAmount; i < 15; i++ {
+		addRegister("", "")
+	}
 }
 
 func addFileToSystem(source, jsondata string) {
@@ -82,6 +94,7 @@ func addFileToSystem(source, jsondata string) {
 			Content:     err.Error(),
 			Instruction: -1,
 		})
+		return
 	}
 	if filemanager.Current() != nil {
 		storeFileContent("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("text", fi.Text))
@@ -95,6 +108,7 @@ func addFileToSystem(source, jsondata string) {
 			Content:     err.Error(),
 			Instruction: -1,
 		})
+		return
 	} else {
 		hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name()))
 		hController.SetInQml(TextField_FilePath, hermes.BuildSetModeJSON("text", ""))
@@ -161,6 +175,7 @@ func saveFile(source, jsondata string) {
 				Content:     err.Error(),
 				Instruction: -1,
 			})
+			return
 		}
 	} else {
 		// save non-current file (no changes, since not opened)
@@ -212,7 +227,138 @@ func removeBreakpoint(source, jsondata string) {
 	hController.RemoveFromQml(source)
 }
 
+func sliderMoved(source, jsondata string) {
+	type SliderInfo struct {
+		Value float64 `json:"value"`
+	}
+	var si SliderInfo
+	err := json.Unmarshal([]byte(jsondata), &si)
+	if err != nil {
+		log.Fatal(err)
+	}
+	delay = int(1000 * 5 * si.Value)
+	if c != nil {
+		go c.SetDelay(delay)
+	}
+}
+
+func addRegister(source, jsondata string) {
+	if status != interpreter.Running {
+		registerAmount++
+		hController.AddToQmlFromFile(Grid_RegisterList, hermes.BuildAddModeJSON("tmplRegister.qml", "id", "register"+strconv.Itoa(registerAmount), "number", strconv.Itoa(registerAmount), "value", "0"))
+	} else {
+		pushNotification(interpreter.Notification{
+			Type:        interpreter.Warning,
+			Content:     "invalid status",
+			Instruction: -1,
+		})
+	}
+}
+
+func removeRegister(source, jsondata string) {
+	if status != interpreter.Running {
+		if registerAmount != -1 {
+			hController.RemoveFromQml("register" + strconv.Itoa(registerAmount))
+			registerAmount--
+		}
+	} else {
+		pushNotification(interpreter.Notification{
+			Type:        interpreter.Warning,
+			Content:     "invalid status",
+			Instruction: -1,
+		})
+	}
+}
+
+func reload(source, jsondata string) {
+	if status == interpreter.Running {
+		stop("", "")
+	}
+	type File struct {
+		Text string `json:"text"`
+	}
+	var f File
+	err := json.Unmarshal([]byte(jsondata), &f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if filemanager.Current() != nil {
+		filemanager.Current().SetText(regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n"))
+		err = filemanager.Current().Save()
+		if err != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			return
+		}
+		c, err = controller.NewController(filemanager.Current().Path(), registerAmount)
+		if err != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			return
+		}
+		go c.Process()
+		go c.SetDelay(delay)
+		for bp := range filemanager.Current().Breakpoints() {
+			go c.AddBreakpoint(bp)
+		}
+		go func() {
+			status = interpreter.Running
+			for status == interpreter.Running {
+				select {
+				case ctx := <-c.ContextChan:
+					status = ctx.Status
+					log.Println("print: ", ctx.InstructionCounter)
+					displayContext(ctx)
+				}
+			}
+			c = nil
+		}()
+	}
+}
+
+func run(source, jsondata string) {
+	if c != nil {
+		go c.Run()
+	}
+}
+
+func step(source, jsondata string) {
+	if c != nil {
+		go c.Step()
+	}
+}
+
+func pause(source, jsondata string) {
+	if c != nil {
+		go c.Pause()
+	}
+}
+
+func stop(source, jsondata string) {
+	if c != nil {
+		go c.Stop()
+	}
+}
+
 // helper functions:
+
+func displayContext(ctx interpreter.Context) {
+	hController.SetInQml(Text_InstructionCounter, hermes.BuildSetModeJSON("text", strconv.Itoa(int(ctx.InstructionCounter))))
+	hController.SetInQml(Text_Instruction, hermes.BuildSetModeJSON("text", ctx.Instruction))
+	hController.SetInQml(Text_Accumulator, hermes.BuildSetModeJSON("text", strconv.Itoa(ctx.Accumulator)))
+	for i, r := range ctx.Registers {
+		hController.SetInQml("register"+strconv.Itoa(i), hermes.BuildSetModeJSON("value", strconv.Itoa(r)))
+	}
+	for _, n := range ctx.Output {
+		pushNotification(n)
+	}
+}
 
 func displayBreakpoint(ic uint) {
 	bpString := strconv.Itoa(int(ic))
@@ -239,5 +385,5 @@ func deleteAllBreakpoints(bp map[uint]bool) {
 }
 
 func pushNotification(notification interpreter.Notification) {
-	log.Println(notification.Content)
+	log.Println(notification.Instruction, ": ", notification.Content)
 }

@@ -8,4 +8,8 @@ const (
 	TextArea_FileContent           string = "textEdit"
 	Row_Breakpoints                string = "bpList"
 	TextField_BreakpointIC         string = "bpInput"
+	Text_InstructionCounter        string = "instructionCounterText"
+	Text_Instruction               string = "currentCmdText"
+	Text_Accumulator               string = "accumulatorText"
+	Grid_RegisterList              string = "registerGrid"
 )

@@ -3,6 +3,7 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.0
+
 ApplicationWindow {
     id: window
     visible: true
@@ -11,6 +12,10 @@ ApplicationWindow {
     minimumHeight: 480
     width: Screen.desktopAvailableWidth
     height: Screen.desktopAvailableHeight
+
+    Component.onCompleted: {
+        hermes.sendToGo("event_windowloaded", "", "")
+    }
 
     Connections
     {
@@ -26,7 +31,11 @@ ApplicationWindow {
                                 filepath:filepath,
                                 textEdit:textEdit,
                                 bpList:bpList,
-                                bpInput:bpInput
+                                bpInput:bpInput,
+                                instructionCounterText:instructionCounterText,
+                                currentCmdText: currentCmdText,
+                                accumulatorText:accumulatorText,
+                                registerGrid:registerGrid
                             })
         target: hermes
         onSendToQml:
@@ -120,7 +129,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/load.png"
                 }
-                onClicked: hermes.sendToGo("reload","loadButton","")                
+                onClicked: hermes.sendToGo("event_reload","loadButton", '{"text":"'+textEdit.text+'"}')                
             }
             ToolButton {
                 id: runButton
@@ -129,6 +138,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/run.png"
                 }
+                onClicked: hermes.sendToGo("event_run","","")
             }
             ToolButton {
                 id: stepButton
@@ -137,6 +147,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/step.png"
                 }
+                onClicked: hermes.sendToGo("event_step","","")
             }
             ToolButton {
                 id: pauseButton
@@ -145,6 +156,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/pause.png"
                 }
+                onClicked: hermes.sendToGo("event_pause","","")
             }
             ToolButton {
                 id: stopButton
@@ -153,6 +165,7 @@ ApplicationWindow {
                     scale: 0.5
                     source: 'img/stop.png'
                 }
+                onClicked: hermes.sendToGo("event_stop","","")
             }
             Item {
                 height: parent.height
@@ -161,6 +174,7 @@ ApplicationWindow {
             Slider {
                 id: speedSlider
                 width: 100
+                onMoved: hermes.sendToGo("event_slidermoved", "speedSlider", '{"value":'+value+'}')
             }
             Text {
                 height: parent.height
@@ -177,10 +191,9 @@ ApplicationWindow {
             height: parent.height
             width: parent.width * .3
             Text {
-                height: parent.height
                 id: instructionCounterText
+                height: parent.height
                 color: "#ffffff"
-                text: qsTr("25")
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
@@ -190,16 +203,15 @@ ApplicationWindow {
                 padding: 5
                 height: parent.height
                 color: "#ffffff"
-                text: qsTr(":")
+                text: ":"
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 font.pointSize: 18
             }
             Text {
-                padding: 5
                 id: currentCmdText
-                text: qsTr("LOAD 4")
+                padding: 5
                 height: parent.height
                 color: "#ffffff"
                 styleColor: "#ffffff"
@@ -209,11 +221,10 @@ ApplicationWindow {
             }
         }
         Text {
+            id: accumulatorText
             anchors.right: parent.right
             anchors.rightMargin: 15
             height: parent.height
-            id: accumulatorText
-            text: qsTr("-12")
             color: "#ffffff"
             styleColor: "#ffffff"
             verticalAlignment: Text.AlignVCenter
@@ -328,7 +339,6 @@ ApplicationWindow {
             }
 
             ScrollBar.vertical: ScrollBar {}
-            //ScrollIndicator.vertical: ScrollIndicator{}
         }
 
         Flickable {
@@ -339,38 +349,13 @@ ApplicationWindow {
             contentHeight: registerGrid.implicitHeight + 30
 
             flickableDirection: Flickable.VerticalFlick
+
             Grid {
                 id: registerGrid
                 columns: width / 85
-                width: parent.width
-                Repeater {
-                    id: registerRepeater
-                    model: 99
-                    delegate: Column{
-                        width: parent.width / parent.columns
-                        height: width
-
-                        Text {
-                            color: "#3f51b5"
-                            width: parent.width
-                            height: 3 * parent.height / 5
-                            text: "R"+index
-                            verticalAlignment: Text.AlignBottom
-                            horizontalAlignment: Text.AlignHCenter
-                            padding: 5
-                        }
-                        Text {
-                            width: parent.width
-                            height: 2 * parent.height / 5
-                            text: index
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            font.pointSize: 18
-                        }
-
-                    }
-                }
+                width: parent.width            
             }
+
 
             ScrollIndicator.vertical: ScrollIndicator {}
         }
@@ -428,7 +413,7 @@ ApplicationWindow {
             }
             Flickable {
                 clip: true
-                width: parent.width - 80 - parent.height - bpInput.width - bpSwitch.width - 10
+                width: parent.width - 80 - (3 * parent.height) - bpInput.width - bpSwitch.width - 10
                 height: parent.height
                 boundsBehavior: Flickable.StopAtBounds
                 contentWidth: bpList.implicitWidth
@@ -439,7 +424,30 @@ ApplicationWindow {
                     height: parent.height
                 }
             }
+            Item {
+                height: parent.height
+                width: 10
+            }
+            ToolButton {
+                onClicked: hermes.sendToGo("event_addregister", "", "")
 
+                Image{
+                    anchors.fill: parent
+                    scale: 0.5
+                    source: 'img/add.png'
+                }
+            }
+
+            ToolButton {
+                padding: 5
+                onClicked: hermes.sendToGo("event_removeregister", "", "")
+
+                Image{
+                    anchors.fill: parent
+                    scale: 0.5
+                    source: 'img/close.png'
+                }
+            } 
         }
     }
 

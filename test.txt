@@ -1,3 +1,5 @@
-12: MOV 1
-1: LOAD 3
-4 LOAD 17 -- main
+1: DLOAD 7
+2: STORE 3
+3: LOAD 3
+4 LOAD 14 -- main
+5 JUMP 4

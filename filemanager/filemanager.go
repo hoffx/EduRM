@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/hoffx/EduRM/script"
 )
 
 // filemanager errors
@@ -87,7 +85,7 @@ func AddFile(path string) (err error) {
 
 	}
 
-	files[name] = NewFile(name, path, string(text), &script.Script{}, make(map[uint]bool, 0))
+	files[name] = NewFile(name, path, string(text), make(map[uint]bool, 0))
 
 	current = name
 	return

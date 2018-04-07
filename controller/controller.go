@@ -18,7 +18,7 @@ const (
 // Controller warnings
 const (
 	WarStoppedByUser       = "the process was successfully killed"
-	WarStoppedInfiniteLoop = "the process was killed, because if ran into an infinite loop"
+	WarStoppedInfiniteLoop = "the process was killed, because it ran into an infinite loop"
 )
 
 type Controller struct {
@@ -69,19 +69,16 @@ func (c *Controller) Process() {
 		case bp := <-c.breakpointActivateChan:
 			c.breakpoints[bp] = true
 		case bp := <-c.breakpointDeactivateChan:
-			c.breakpoints[bp] = false
+			delete(c.breakpoints, bp)
 		default:
 			if mode != pause {
 				if mode == stop {
 					c.context.Output = append(c.context.Output, interpreter.Notification{interpreter.Warning, WarStoppedByUser, int(c.context.InstructionCounter)})
 					c.context.Status = interpreter.Failure
+					c.ContextChan <- c.context
 				} else {
-					if mode == run {
-						time.Sleep(time.Duration(c.delay) * time.Millisecond)
-						c.context.Next()
-					} else {
-						// mode is step
-						c.context.Next()
+					c.context.Next()
+					if mode == step {
 						mode = pause
 					}
 					// check if script ran into infinite loop
@@ -89,22 +86,36 @@ func (c *Controller) Process() {
 						// check if current context is identical to a previous candidate
 						for _, iLCtx := range infiniteLoopCandidates {
 							if iLCtx.InstructionCounter == c.context.InstructionCounter && c.context.Accumulator == iLCtx.Accumulator {
+								var isNotInfinite bool
 								for i := range c.context.Registers {
 									if c.context.Registers[i] != iLCtx.Registers[i] {
+										isNotInfinite = true
 										break
 									}
+								}
+								if !isNotInfinite {
 									// script ran into infinite loop
 									c.context.Output = append(c.context.Output, interpreter.Notification{interpreter.Warning, WarStoppedInfiniteLoop, int(c.context.InstructionCounter)})
 									c.context.Status = interpreter.Failure
+									break
 								}
 							}
 						}
 						infiniteLoopCandidates = append(infiniteLoopCandidates, c.context)
 					}
+					if lastInstructionCounter == 0 {
+						time.Sleep(time.Duration(c.delay) * time.Millisecond)
+					}
+					c.ContextChan <- c.context
+					if mode == run {
+						// don't delay if in step mode
+						time.Sleep(time.Duration(c.delay) * time.Millisecond)
+					}
+
+					c.context.Output = make([]interpreter.Notification, 0)
 					lastInstructionCounter = c.context.InstructionCounter
 				}
-				c.ContextChan <- c.context
-				c.context.Output = make([]interpreter.Notification, 0)
+
 			}
 
 			// check for breakpoint
