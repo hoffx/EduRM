@@ -1,6 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Window 2.2
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.0
 
@@ -12,10 +12,6 @@ ApplicationWindow {
     minimumHeight: 480
     width: Screen.desktopAvailableWidth
     height: Screen.desktopAvailableHeight
-
-    Component.onCompleted: {
-        hermes.sendToGo("event_windowloaded", "", "")
-    }
 
     Connections
     {
@@ -109,6 +105,9 @@ ApplicationWindow {
         }
     }
 
+    Component.onCompleted: {
+        hermes.sendToGo("event_windowloaded", "", "")
+    }
 
     ToolBar {
         id: toolBar
@@ -130,7 +129,13 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/load.png"
                 }
-                onClicked: hermes.sendToGo("event_reload","loadButton", '{"text":"'+textEdit.text+'"}')                
+                action: loadAction
+
+                Action {
+                    id: loadAction
+                    shortcut: "F6"
+                    onTriggered: hermes.sendToGo("event_reload","loadButton", '{"text":"'+textEdit.text+'"}')
+                }           
             }
             ToolButton {
                 id: runButton
@@ -139,7 +144,13 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/run.png"
                 }
-                onClicked: hermes.sendToGo("event_run","","")
+                action: runAction
+
+                Action {
+                    id: runAction
+                    shortcut: "F7"
+                    onTriggered: hermes.sendToGo("event_run","","")
+                }
             }
             ToolButton {
                 id: stepButton
@@ -148,7 +159,13 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/step.png"
                 }
-                onClicked: hermes.sendToGo("event_step","","")
+                action: stepAction
+
+                Action {
+                    id: stepAction
+                    shortcut: "F8"
+                    onTriggered: hermes.sendToGo("event_step","","")
+                }
             }
             ToolButton {
                 id: pauseButton
@@ -157,7 +174,13 @@ ApplicationWindow {
                     scale: 0.5
                     source: "img/pause.png"
                 }
-                onClicked: hermes.sendToGo("event_pause","","")
+                action: pauseAction
+
+                Action {
+                    id: pauseAction
+                    shortcut: "F9"
+                    onTriggered: hermes.sendToGo("event_pause","","")
+                }
             }
             ToolButton {
                 id: stopButton
@@ -166,7 +189,13 @@ ApplicationWindow {
                     scale: 0.5
                     source: 'img/stop.png'
                 }
-                onClicked: hermes.sendToGo("event_stop","","")
+                action: stopAction
+
+                Action {
+                    id: stopAction
+                    shortcut: "F10"
+                    onTriggered: hermes.sendToGo("event_stop","","")
+                }
             }
             Item {
                 height: parent.height
@@ -268,7 +297,7 @@ ApplicationWindow {
                         font.pointSize: 14
                         Keys.onReturnPressed: {
                             hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text+'"}')
-                        }
+                        }                 
                     }
                     ToolButton {
                         id: addFileFromFilepath
