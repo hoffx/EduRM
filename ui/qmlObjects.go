@@ -12,4 +12,5 @@ const (
 	Text_Instruction               string = "currentCmdText"
 	Text_Accumulator               string = "accumulatorText"
 	Grid_RegisterList              string = "registerGrid"
+	Switch_Breakpoints             string = "bpSwitch"
 )

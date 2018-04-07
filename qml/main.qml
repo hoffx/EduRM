@@ -35,7 +35,8 @@ ApplicationWindow {
                                 instructionCounterText:instructionCounterText,
                                 currentCmdText: currentCmdText,
                                 accumulatorText:accumulatorText,
-                                registerGrid:registerGrid
+                                registerGrid:registerGrid,
+                                bpSwitch:bpSwitch
                             })
         target: hermes
         onSendToQml:
@@ -381,6 +382,7 @@ ApplicationWindow {
                 scale: 0.8
                 checked: true
                 height: parent.height
+                onClicked: hermes.sendToGo("event_togglebreakpoints", "", "")
             }
             Item {
                 height: parent.height

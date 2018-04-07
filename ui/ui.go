@@ -29,6 +29,7 @@ var (
 	registerAmount int = -1
 	delay          int
 	status         int
+	useBreakpoints bool = true
 )
 
 func Run() {
@@ -64,6 +65,7 @@ func Run() {
 	hController.AddEventListener(Event_Step, step)
 	hController.AddEventListener(Event_Pause, pause)
 	hController.AddEventListener(Event_Stop, stop)
+	hController.AddEventListener(Event_ToggleBreakpoints, toggleBreakpoints)
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
@@ -227,6 +229,14 @@ func removeBreakpoint(source, jsondata string) {
 	hController.RemoveFromQml(source)
 }
 
+func toggleBreakpoints(source, jsondata string) {
+	if status != interpreter.Running {
+		useBreakpoints = !useBreakpoints
+	} else {
+		hController.SetInQml(Switch_Breakpoints, hermes.BuildSetModeJSON("checked", strconv.FormatBool(useBreakpoints)))
+	}
+}
+
 func sliderMoved(source, jsondata string) {
 	type SliderInfo struct {
 		Value float64 `json:"value"`
@@ -304,8 +314,10 @@ func reload(source, jsondata string) {
 		}
 		go c.Process()
 		go c.SetDelay(delay)
-		for bp := range filemanager.Current().Breakpoints() {
-			go c.AddBreakpoint(bp)
+		if useBreakpoints {
+			for bp := range filemanager.Current().Breakpoints() {
+				go c.AddBreakpoint(bp)
+			}
 		}
 		go func() {
 			status = interpreter.Running
@@ -313,7 +325,6 @@ func reload(source, jsondata string) {
 				select {
 				case ctx := <-c.ContextChan:
 					status = ctx.Status
-					log.Println("print: ", ctx.InstructionCounter)
 					displayContext(ctx)
 				}
 			}
