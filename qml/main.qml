@@ -44,6 +44,13 @@ ApplicationWindow {
             switch(mode) {
             case 0:
                 for(var key in data) {
+                    /*console.log("-----------------")
+                    console.log(target)
+                    console.log(key.toString())
+                    console.log(this.idMap[target])
+                    console.log(this.idMap[target][key.toString()])
+                    console.log(data[key.toString()])
+                    console.log("-----------------")*/
                     this.idMap[target][key.toString()] = data[key.toString()]
                 }
                 break;
@@ -248,7 +255,7 @@ ApplicationWindow {
                         layer.enabled: true
                         font.pointSize: 14
                         Keys.onReturnPressed: {
-                            hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
+                            hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text+'"}')
                         }
                     }
                     ToolButton {
@@ -260,7 +267,7 @@ ApplicationWindow {
                             scale: 0.5
                             source: "img/add.png"
                         }
-                        onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '" }')
+                        onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text+'"}')
                     }
                     ToolButton {
                         height: parent.height
@@ -401,6 +408,9 @@ ApplicationWindow {
                 color: "#ffffff"
                 validator: IntValidator{bottom: 1;}
                 placeholderText: "instruction counter"
+                Keys.onReturnPressed: {
+                    hermes.sendToGo("event_addbreakpoint", "", '{"instructioncounter":"' + bpInput.text + '"}')
+                }
             }
             ToolButton {
                 height: parent.height

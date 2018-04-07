@@ -10,7 +10,7 @@ import (
 
 	"github.com/hoffx/EduRM/filemanager"
 	"github.com/hoffx/EduRM/interpreter"
-	"github.com/hoffx/hermes"
+	"github.com/theMomax/hermes"
 
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
@@ -72,6 +72,7 @@ func receivePropertyInfo(source, jsondata string) {
 func addFileToSystem(source, jsondata string) {
 	type FileInfo struct {
 		Path string
+		Text string
 	}
 	var fi FileInfo
 	err := json.Unmarshal([]byte(jsondata), &fi)
@@ -82,8 +83,9 @@ func addFileToSystem(source, jsondata string) {
 			Instruction: -1,
 		})
 	}
-	storeFileContent("", "")
 	if filemanager.Current() != nil {
+		storeFileContent("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("text", fi.Text))
+		hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		deleteAllBreakpoints(filemanager.Current().Breakpoints())
 	}
 	err = filemanager.AddFile(fi.Path)
@@ -105,29 +107,23 @@ func addFileToSystem(source, jsondata string) {
 	}
 }
 
-var fileToShow string
-
 func showFile(source, jsondata string) {
-	id := strings.TrimPrefix(source, "file")
 	type File struct {
 		Text string `json:"text"`
 	}
 	var f File
 	err := json.Unmarshal([]byte(jsondata), &f)
-	if err != nil && jsondata != "" {
+	if err != nil {
 		log.Fatal(err)
-	} else if jsondata == "" {
-		// request current file's content
-		fileToShow = id
-		hController.ReadQml(TextArea_FileContent, hermes.BuildReadModeJSON(Event_ShowFile, "text"))
 	} else {
 		// set the old file's content and delete its breakpoints
 		if filemanager.Current() != nil {
 			filemanager.Current().SetText(regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n"))
 			deleteAllBreakpoints(filemanager.Current().Breakpoints())
+			hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		}
 
-		displayFile(fileToShow)
+		displayFile(strings.TrimPrefix(source, "file"))
 	}
 
 }
@@ -139,6 +135,7 @@ func removeFile(source, jsondata string) {
 		filemanager.Remove(file.Name())
 		deleteAllBreakpoints(file.Breakpoints())
 	}
+	hController.RemoveFromQml(source)
 	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", ""))
 }
 
@@ -172,28 +169,17 @@ func saveFile(source, jsondata string) {
 }
 
 func storeFileContent(source, jsondata string) {
-	if source == "" {
-		// request file content
-		hController.ReadQml(TextArea_FileContent, hermes.BuildReadModeJSON(Event_StoreFileContent, "text"))
-	} else {
-		// store file content
-		type File struct {
-			Text string `json:"text"`
-		}
-		var f File
-		err := json.Unmarshal([]byte(jsondata), &f)
-		if err != nil {
-			pushNotification(interpreter.Notification{
-				Type:        interpreter.Error,
-				Content:     err.Error(),
-				Instruction: -1,
-			})
-		} else {
-			file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
-			if file != nil {
-				file.SetText(f.Text)
-			}
-		}
+	type File struct {
+		Text string `json:"text"`
+	}
+	var f File
+	err := json.Unmarshal([]byte(jsondata), &f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
+	if file != nil {
+		file.SetText(f.Text)
 	}
 }
 
@@ -236,6 +222,8 @@ func displayBreakpoint(ic uint) {
 func displayFile(id string) {
 	// set current file to requested id
 	filemanager.SetCurrent(filemanager.GetByID(id).Name())
+	// set filelistitem's current property to true
+	hController.SetInQml("file"+id, hermes.BuildSetModeJSON("current", "true"))
 	// set textarea content to current file text
 	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", filemanager.GetByID(id).Text()))
 	// load breakpoints

@@ -7,6 +7,7 @@ Item {
     height: 50
     property string filename: ""
     property string idtext: ""
+    property string current: "false"
 
     MouseArea {
         anchors.fill: parent
@@ -33,8 +34,9 @@ Item {
                     horizontalAlignment: Text.AlignLeft
                     padding: 5
                     elide: parent.parent.parent.containsMouse ? Text.ElideLeft : Text.ElideNone
+                    color: current == "true" ? "#3f51b5" : "#000000"
                 }
-                onClicked: hermes.sendToGo("event_showfile", idtext, "")
+                onClicked: hermes.sendToGo("event_showfile", idtext, '{"text":"'+textEdit.text+'"}')
             }
             ToolButton {
                 height: parent.height
