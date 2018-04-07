@@ -53,6 +53,7 @@ func Run() {
 	hController.AddEventListener(Event_AddFile, addFileToSystem)
 	hController.AddEventListener(Event_RemoveFile, removeFile)
 	hController.AddEventListener(Event_SaveFile, saveFile)
+	hController.AddEventListener(Event_SaveAllFiles, saveAllFiles)
 	hController.AddEventListener(Event_StoreFileContent, storeFileContent)
 	hController.AddEventListener(Event_ShowFile, showFile)
 	hController.AddEventListener(Event_AddBreakpoint, addBreakpoint)
@@ -156,7 +157,12 @@ func removeFile(source, jsondata string) {
 }
 
 func saveFile(source, jsondata string) {
-	id := strings.TrimPrefix(source, "file")
+	var id string
+	if source == "" {
+		id = filemanager.Current().ID()
+	} else {
+		id = strings.TrimPrefix(source, "file")
+	}
 	type File struct {
 		Text string `json:"text"`
 	}
@@ -168,7 +174,6 @@ func saveFile(source, jsondata string) {
 
 	f.Text = regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n")
 	if id == filemanager.Current().ID() {
-		log.Println(f.Text)
 		filemanager.Current().SetText(f.Text)
 		err = filemanager.Current().Save()
 		if err != nil {
@@ -181,7 +186,42 @@ func saveFile(source, jsondata string) {
 		}
 	} else {
 		// save non-current file (no changes, since not opened)
-		filemanager.GetByID(id).Save()
+		err = filemanager.GetByID(id).Save()
+		if err != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			return
+		}
+	}
+}
+
+func saveAllFiles(source, jsondata string) {
+	type File struct {
+		Text string `json:"text"`
+	}
+	var f File
+	err := json.Unmarshal([]byte(jsondata), &f)
+	if err != nil && jsondata != "" {
+		log.Fatal(err)
+	}
+
+	f.Text = regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n")
+	if filemanager.Current() != nil {
+		filemanager.Current().SetText(f.Text)
+	}
+	for _, f := range filemanager.GetAll() {
+		err = f.Save()
+		if err != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			err = nil
+		}
 	}
 }
 

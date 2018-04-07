@@ -109,6 +109,23 @@ ApplicationWindow {
         hermes.sendToGo("event_windowloaded", "", "")
     }
 
+    Action {
+        id: saveAction
+        shortcut: StandardKey.Save
+        onTriggered: {
+            hermes.sendToGo("event_savefile","",'{"text":"'+textEdit.text+'"}')
+        }
+    }
+
+    Action {
+        id: saveAllAction
+        shortcut: StandardKey.SaveAs
+        onTriggered: {
+            hermes.sendToGo("event_saveallfiles","",'{"text":"'+textEdit.text+'"}')
+        }
+
+    }
+
     ToolBar {
         id: toolBar
         position: ToolBar.Header
