@@ -1,5 +1,8 @@
 1: DLOAD 7
 2: STORE 3
 3: LOAD 3
-4 LOAD 14 -- main
-5 JUMP 4
+4: LOAD 14 -- öasklf
+5: JUMP 4
+6: STORE 24
+7: JUMP 19
+8: END

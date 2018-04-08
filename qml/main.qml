@@ -388,7 +388,20 @@ ApplicationWindow {
                 wrapMode: TextArea.Wrap
                 padding: 15
                 background: null
+                text: "1: "
                 font.family: "Menlo, Monaco, 'Courier New', monospace"
+
+                Keys.onPressed: {
+                    if (event.key == Qt.Key_Return && textEdit.cursorPosition == textEdit.length) {
+                        var lines = this.text.split(/\r?\n/g)
+                        var lastline = lines[lines.length - 1]
+                        lastline.replace(/([0-9]+)[:\s]+.*/g, function(match, p1) {
+                            textEdit.append((parseInt(p1)+1).toString() + ": ")
+                            return match
+                        })
+                        event.accepted = true
+                    }
+                }
 
                 MouseArea {
                     enabled: false
@@ -509,7 +522,7 @@ ApplicationWindow {
                 Image{
                     anchors.fill: parent
                     scale: 0.5
-                    source: 'img/close.png'
+                    source: 'img/remove.png'
                 }
             } 
         }
@@ -518,9 +531,7 @@ ApplicationWindow {
     FileDialog {
         id: fileDialog
         visible: false
-        //modality: fileDialogModal.checked ? Qt.WindowModal : Qt.NonModal
         title: qsTr("Select your assembly file")
-        //selectExisting: fileDialogSelectExisting.checked
         selectMultiple: false
         selectFolder: false
         nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
