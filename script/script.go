@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-var instructionRegex = regexp.MustCompile(`([0-9]+)[:\s]+([A-Z]+)(\s+(-?[0-9]+))?(\s*--[\w ]+)?`)
+var instructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([A-Z]+)(\s+(-?[0-9]+))?(\s*--[\w ]+)?$`)
 
 // Script represents a script written in assembly ready to be interpreted
 type Script struct {
@@ -70,16 +70,10 @@ func ParseInstruction(instruction string) (Instruction, error) {
 	}, nil
 }
 
-// ParseFile parses the file in the given location and returns it's contents as a ready assembly script
-func ParseFile(path string) (*Script, error) {
-	f, err := os.Open(path)
-	defer f.Close()
-	if err != nil {
-		return nil, err
-	}
-	s := NewScript(f.Name())
-	s.Path = path
-	rd := bufio.NewReader(f)
+// Parse parses the given reader and returns it's contents as a ready assembly script
+func Parse(name string, r io.Reader) (*Script, error) {
+	s := NewScript(name)
+	rd := bufio.NewReader(r)
 	for {
 		l, _, err := rd.ReadLine()
 		if err == io.EOF && len(l) == 0 {
@@ -93,4 +87,16 @@ func ParseFile(path string) (*Script, error) {
 		}
 	}
 	return s, nil
+}
+
+// ParseFile parses the file in the given location and returns it's contents as a ready assembly script
+func ParseFile(path string) (*Script, error) {
+	f, err := os.Open(path)
+	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
+	s, err := Parse(f.Name(), f)
+	s.Path = path
+	return s, err
 }

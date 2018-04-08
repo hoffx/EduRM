@@ -33,7 +33,7 @@ func TestParseInstruction(t *testing.T) {
 		t.Run(tt.instruction, func(t *testing.T) {
 			got, err := ParseInstruction(tt.instruction)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseInstruction() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseInstruction() ret = %v error = %v, wantErr %v", got, err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
