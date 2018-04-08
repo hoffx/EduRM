@@ -25,7 +25,8 @@ func TestAddingFiles(t *testing.T) {
 		t.Error(err)
 	}
 	files := filemanager.GetAll()
-	for k := range files {
-		log.Println(k)
+	for k, f := range files {
+		log.Println(k, ":", f)
 	}
+	t.Error("")
 }

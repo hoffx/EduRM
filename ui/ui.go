@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -54,7 +53,6 @@ func Run() {
 	hController.AddEventListener(Event_RemoveFile, removeFile)
 	hController.AddEventListener(Event_SaveFile, saveFile)
 	hController.AddEventListener(Event_SaveAllFiles, saveAllFiles)
-	hController.AddEventListener(Event_StoreFileContent, storeFileContent)
 	hController.AddEventListener(Event_ShowFile, showFile)
 	hController.AddEventListener(Event_AddBreakpoint, addBreakpoint)
 	hController.AddEventListener(Event_RemoveBreakpoint, removeBreakpoint)
@@ -135,7 +133,7 @@ func showFile(source, jsondata string) {
 	} else {
 		// set the old file's content and delete its breakpoints
 		if filemanager.Current() != nil {
-			filemanager.Current().SetText(regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n"))
+			filemanager.Current().SetText(f.Text)
 			deleteAllBreakpoints(filemanager.Current().Breakpoints())
 			hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		}
@@ -149,11 +147,13 @@ func removeFile(source, jsondata string) {
 	file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
 
 	if file != nil {
-		filemanager.Remove(file.Name())
+		if file == filemanager.Current() {
+			hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", ""))
+		}
 		deleteAllBreakpoints(file.Breakpoints())
+		filemanager.Remove(file.Name())
 	}
 	hController.RemoveFromQml(source)
-	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", ""))
 }
 
 func saveFile(source, jsondata string) {
@@ -171,8 +171,6 @@ func saveFile(source, jsondata string) {
 	if err != nil && jsondata != "" {
 		log.Fatal(err)
 	}
-
-	f.Text = regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n")
 	if id == filemanager.Current().ID() {
 		filemanager.Current().SetText(f.Text)
 		err = filemanager.Current().Save()
@@ -208,7 +206,6 @@ func saveAllFiles(source, jsondata string) {
 		log.Fatal(err)
 	}
 
-	f.Text = regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n")
 	if filemanager.Current() != nil {
 		filemanager.Current().SetText(f.Text)
 	}
@@ -222,21 +219,6 @@ func saveAllFiles(source, jsondata string) {
 			})
 			err = nil
 		}
-	}
-}
-
-func storeFileContent(source, jsondata string) {
-	type File struct {
-		Text string `json:"text"`
-	}
-	var f File
-	err := json.Unmarshal([]byte(jsondata), &f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
-	if file != nil {
-		file.SetText(f.Text)
 	}
 }
 
@@ -333,7 +315,7 @@ func reload(source, jsondata string) {
 		log.Fatal(err)
 	}
 	if filemanager.Current() != nil {
-		filemanager.Current().SetText(regexp.MustCompile(`\\n`).ReplaceAllString(regexp.MustCompile(`\\r\\n`).ReplaceAllString(f.Text, "\r\n"), "\n"))
+		filemanager.Current().SetText(f.Text)
 		err = filemanager.Current().Save()
 		if err != nil {
 			pushNotification(interpreter.Notification{
@@ -417,8 +399,9 @@ func displayBreakpoint(ic uint) {
 }
 
 func displayFile(id string) {
+	file := filemanager.GetByID(id)
 	// set current file to requested id
-	filemanager.SetCurrent(filemanager.GetByID(id).Name())
+	filemanager.SetCurrent(file.Name())
 	// set filelistitem's current property to true
 	hController.SetInQml("file"+id, hermes.BuildSetModeJSON("current", "true"))
 	// set textarea content to current file text
@@ -436,5 +419,12 @@ func deleteAllBreakpoints(bp map[uint]bool) {
 }
 
 func pushNotification(notification interpreter.Notification) {
-	log.Println(notification.Instruction, ": ", notification.Content)
+	hController.AddToQmlFromFile(Column_Notifications, hermes.BuildAddModeJSON("tmplNotification.qml", "content", notification.Content, "ic", strconv.Itoa(notification.Instruction), "type", strconv.Itoa(notification.Type)))
+}
+
+func storeFileContent(id, content string) {
+	file := filemanager.GetByID(id)
+	if file != nil {
+		file.SetText(content)
+	}
 }

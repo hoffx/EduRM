@@ -13,4 +13,5 @@ const (
 	Text_Accumulator               string = "accumulatorText"
 	Grid_RegisterList              string = "registerGrid"
 	Switch_Breakpoints             string = "bpSwitch"
+	Column_Notifications           string = "notificationColumn"
 )

@@ -3,6 +3,7 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.0
+import QtQuick.Controls.Material 2.0
 
 ApplicationWindow {
     id: window
@@ -32,7 +33,8 @@ ApplicationWindow {
                                 currentCmdText: currentCmdText,
                                 accumulatorText:accumulatorText,
                                 registerGrid:registerGrid,
-                                bpSwitch:bpSwitch
+                                bpSwitch:bpSwitch,
+                                notificationColumn:notificationColumn
                             })
         target: hermes
         onSendToQml:
@@ -40,23 +42,10 @@ ApplicationWindow {
             var data = ""
             if (jsondata != "") {
                 data = JSON.parse(jsondata)
-                for (var key in data) {
-                    if (data[key.toString()].toString().includes("\\n")) {
-                        data[key.toString()] = data[key.toString()].toString().replace(/\\r\\n/g, "\r\n")
-                        data[key.toString()] = data[key.toString()].toString().replace(/\\n/g, "\n")
-                    }
-                }
             }
             switch(mode) {
             case 0:
                 for(var key in data) {
-                    /*console.log("-----------------")
-                    console.log(target)
-                    console.log(key.toString())
-                    console.log(this.idMap[target])
-                    console.log(this.idMap[target][key.toString()])
-                    console.log(data[key.toString()])
-                    console.log("-----------------")*/
                     this.idMap[target][key.toString()] = data[key.toString()]
                 }
                 break;
@@ -113,7 +102,7 @@ ApplicationWindow {
         id: saveAction
         shortcut: StandardKey.Save
         onTriggered: {
-            hermes.sendToGo("event_savefile","",'{"text":"'+textEdit.text+'"}')
+            hermes.sendToGo("event_savefile","",'{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
         }
     }
 
@@ -121,7 +110,7 @@ ApplicationWindow {
         id: saveAllAction
         shortcut: StandardKey.SaveAs
         onTriggered: {
-            hermes.sendToGo("event_saveallfiles","",'{"text":"'+textEdit.text+'"}')
+            hermes.sendToGo("event_saveallfiles","",'{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
         }
 
     }
@@ -151,7 +140,7 @@ ApplicationWindow {
                 Action {
                     id: loadAction
                     shortcut: "F6"
-                    onTriggered: hermes.sendToGo("event_reload","loadButton", '{"text":"'+textEdit.text+'"}')
+                    onTriggered: hermes.sendToGo("event_reload","loadButton", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                 }           
             }
             ToolButton {
@@ -285,64 +274,52 @@ ApplicationWindow {
         anchors.fill: parent
         anchors.bottomMargin: bpBar.height
 
-        Flickable {
+        Column {
             width: parent.width * .2
             height: parent.height
-            flickableDirection: Flickable.VerticalFlick
-            boundsBehavior: Flickable.StopAtBounds
-            contentHeight: filesColumn.implicitHeight
-            clip: true
 
-            Column{
-                id: filesColumn
+            Row{
                 width: parent.width
-                Row{
-                    width: parent.width
-                    height: 50
-                    padding: 15
+                height: 50
+                padding: 15
 
-                    TextField {
-                        id: filepath
-                        focus: true
-                        padding: 5
-                        placeholderText: "filepath"
-                        width: parent.width - 30 - 2 * height
-                        height: parent.height
-                        verticalAlignment: Text.AlignVCenter
-                        selectByMouse: true
-                        layer.enabled: true
-                        font.pointSize: 14
-                        Keys.onReturnPressed: {
-                            hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text+'"}')
-                        }                 
-                    }
-                    ToolButton {
-                        id: addFileFromFilepath
-                        height: parent.height
-                        width: height
-                        Image{
-                            anchors.fill: parent
-                            scale: 0.5
-                            source: "img/add.png"
-                        }
-                        onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text+'"}')
-                    }
-                    ToolButton {
-                        height: parent.height
-                        width: height
-                        Image{
-                            anchors.fill: parent
-                            scale: 0.5
-                            source: "img/open.png"
-                        }
-
-                        onClicked: fileDialog.open()
-
+                TextField {
+                    id: filepath
+                    focus: true
+                    padding: 5
+                    placeholderText: "filepath"
+                    width: parent.width - 30 - 2 * height
+                    height: parent.height
+                    verticalAlignment: Text.AlignVCenter
+                    selectByMouse: true
+                    layer.enabled: true
+                    font.pointSize: 14
+                    Keys.onReturnPressed: {
+                        hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                     }
                 }
-                Item{
-                    width: parent.width
-                    height: 30
+                ToolButton {
+                    id: addFileFromFilepath
+                    height: parent.height
+                    width: height
+                    Image{
+                        anchors.fill: parent
+                        scale: 0.5
+                        source: "img/add.png"
+                    }
+                    onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+                }
+                ToolButton {
+                    height: parent.height
+                    width: height
+                    Image{
+                        anchors.fill: parent
+                        scale: 0.5
+                        source: "img/open.png"
+                    }
+
+                    onClicked: fileDialog.open()
+
                 }
             }
             Item{
@@ -350,8 +327,47 @@ ApplicationWindow {
                 height: 30
             }
 
-            ScrollIndicator.vertical: ScrollIndicator{}
+            Flickable {
+                width: parent.width
+                height: (parent.height - 125) / 2
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior: Flickable.StopAtBounds
+                contentHeight: filesColumn.implicitHeight
+                clip: true
+
+                Column{
+                    id: filesColumn
+                    width: parent.width
+                }
+            }
+
+            Item{
+                width: parent.width
+                height: 30
+            }
+
+            Flickable {
+                width: parent.width
+                height: (parent.height - 125) / 2
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior: Flickable.StopAtBounds
+                contentHeight: notificationColumn.implicitHeight
+                clip: true
+
+                Column {
+                    id: notificationColumn
+                    width: parent.width
+                    spacing: 15
+                }
+            }
+
+            Item{
+                width: parent.width
+                height: 15
+            }
         }
+        
+
 
 
         Flickable {
@@ -390,7 +406,7 @@ ApplicationWindow {
 
         Flickable {
             clip: true
-            width: parent.width * .30
+            width: parent.width * .3
             height: parent.height
             boundsBehavior: Flickable.StopAtBounds
             contentHeight: registerGrid.implicitHeight + 30

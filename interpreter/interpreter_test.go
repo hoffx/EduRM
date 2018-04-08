@@ -19,7 +19,4 @@ func TestInterpreter(t *testing.T) {
 		log.Println(ctx.Output)
 		log.Println(ctx.Status)
 	}
-	if err != nil {
-		t.Error(err)
-	}
 }

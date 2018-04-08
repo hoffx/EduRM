@@ -3,6 +3,7 @@ package filemanager
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,10 +45,11 @@ func AddFile(path string) (err error) {
 
 	// create a unique and user-friendly names for all files
 	// with same base
-	var equalNamedFiles []File
+	var equalNamedFiles []*File
 	for k, _ := range files {
 		if strings.Contains(k, name) {
-			equalNamedFiles = append(equalNamedFiles, *files[k])
+			equalNamedFiles = append(equalNamedFiles, files[k])
+			log.Println(files[k])
 		}
 	}
 
@@ -57,6 +59,7 @@ func AddFile(path string) (err error) {
 		} else {
 			var oldsname, newsname string
 			old := strings.Split(f.path, "/")
+			log.Println(old)
 			new := strings.Split(path, "/")
 			length := len(old)
 			if len(new) < len(old) {
@@ -78,9 +81,11 @@ func AddFile(path string) (err error) {
 				}
 			}
 			name = newsname
+
 			delete(files, f.name)
+			log.Println(oldsname)
 			f.name = oldsname
-			files[f.name] = &f
+			files[f.name] = f
 		}
 
 	}

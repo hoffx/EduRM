@@ -36,7 +36,7 @@ Item {
                     elide: parent.parent.parent.containsMouse ? Text.ElideLeft : Text.ElideNone
                     color: current == "true" ? "#3f51b5" : "#000000"
                 }
-                onClicked: hermes.sendToGo("event_showfile", idtext, '{"text":"'+textEdit.text+'"}')
+                onClicked: hermes.sendToGo("event_showfile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
             }
             ToolButton {
                 height: parent.height
@@ -47,7 +47,7 @@ Item {
                     scale: 0.5
                     source: "img/save.png"
                 }
-                onClicked: hermes.sendToGo("event_savefile", idtext, '{"text":"'+textEdit.text+'"}')
+                onClicked: hermes.sendToGo("event_savefile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
             }
             ToolButton {
                 height: parent.height
