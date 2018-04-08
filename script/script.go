@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-var instructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([A-Z]+)(\s+(-?[0-9]+))?(\s*--[\w ]+)?$`)
+var instructionRegex = regexp.MustCompile(`([0-9]+)[:\s]+([A-Z]+)(\s+(-?[0-9]+))?(\s*--[\w ]+)?`)
 
 // Script represents a script written in assembly ready to be interpreted
 type Script struct {
