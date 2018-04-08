@@ -307,5 +307,7 @@ EduRM
 EduRM.exe
 *.gvdesign
 
-# qtmoc files
+# qtdeploy files
 *moc*
+*rcc*
+deploy/*
