@@ -8,6 +8,7 @@ Item {
     property string filename: ""
     property string idtext: ""
     property string current: "false"
+    property string temp: "false"
 
     MouseArea {
         anchors.fill: parent
@@ -47,7 +48,15 @@ Item {
                     scale: 0.5
                     source: "img/save.png"
                 }
-                onClicked: hermes.sendToGo("event_savefile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+                onClicked: {
+                    if(temp === "false"){
+                        hermes.sendToGo("event_savefile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+                    }else{
+                        saveAsFileDialog.open()
+                        hermes.sendToGo("event_savetempfile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+                    }
+                    
+                }
             }
             ToolButton {
                 height: parent.height

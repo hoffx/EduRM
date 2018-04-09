@@ -2,6 +2,7 @@ package ui
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -64,6 +65,7 @@ func Run() {
 	hController.AddEventListener(Event_Pause, pause)
 	hController.AddEventListener(Event_Stop, stop)
 	hController.AddEventListener(Event_ToggleBreakpoints, toggleBreakpoints)
+	hController.AddEventListener(Event_SaveTempFile, saveTempFileAs)
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
@@ -79,6 +81,61 @@ func windowLoaded(source, jsondata string) {
 	for i := registerAmount; i < 15; i++ {
 		addRegister("", "")
 	}
+}
+
+var idToSave string
+
+func saveTempFileAs(source, jsondata string) {
+	type FileInfo struct {
+		Path string
+		Text string
+	}
+	var fi FileInfo
+	err := json.Unmarshal([]byte(jsondata), &fi)
+	if err != nil {
+		pushNotification(interpreter.Notification{
+			Type:        interpreter.Error,
+			Content:     err.Error(),
+			Instruction: -1,
+		})
+		return
+	}
+	if fi.Text != "" {
+		id := strings.TrimPrefix(source, "file")
+		f := filemanager.GetByID(id)
+		if f != nil {
+			f.SetText(fi.Text)
+			idToSave = id
+		} else {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     "file not registered",
+				Instruction: -1,
+			})
+			return
+		}
+	} else if fi.Path != "" && idToSave != "" {
+		f := filemanager.GetByID(idToSave)
+		if f != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     "file not registered",
+				Instruction: -1,
+			})
+			return
+		}
+		err = ioutil.WriteFile(fi.Path, []byte(f.Text()), os.ModePerm)
+		if f != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			return
+		}
+		idToSave = ""
+	}
+
 }
 
 func addFileToSystem(source, jsondata string) {
@@ -100,23 +157,29 @@ func addFileToSystem(source, jsondata string) {
 		storeFileContent("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("text", fi.Text))
 		hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		deleteAllBreakpoints(filemanager.Current().Breakpoints())
+	} else if fi.Path != "" {
+		filemanager.AddTempFile(fi.Text)
+		hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name(), "temp", "true"))
 	}
-	err = filemanager.AddFile(fi.Path)
-	if err != nil {
-		pushNotification(interpreter.Notification{
-			Type:        interpreter.Error,
-			Content:     err.Error(),
-			Instruction: -1,
-		})
-		return
+	if fi.Path != "" {
+		err = filemanager.AddFile(fi.Path)
+		if err != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			return
+		}
 	} else {
-		hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name()))
-		hController.SetInQml(TextField_FilePath, hermes.BuildSetModeJSON("text", ""))
-		displayFile(strings.TrimPrefix(filemanager.Current().ID(), "file"))
-		for _, f := range filemanager.GetAll() {
-			if f.Name() != filemanager.Current().Name() {
-				hController.SetInQml("file"+f.ID(), hermes.BuildSetModeJSON("filename", f.Name()))
-			}
+		filemanager.AddTempFile(fi.Text)
+	}
+	hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name(), "temp", "false"))
+	hController.SetInQml(TextField_FilePath, hermes.BuildSetModeJSON("text", ""))
+	displayFile(strings.TrimPrefix(filemanager.Current().ID(), "file"))
+	for _, f := range filemanager.GetAll() {
+		if f.Name() != filemanager.Current().Name() {
+			hController.SetInQml("file"+f.ID(), hermes.BuildSetModeJSON("filename", f.Name()))
 		}
 	}
 }
@@ -209,14 +272,18 @@ func saveAllFiles(source, jsondata string) {
 		filemanager.Current().SetText(f.Text)
 	}
 	for _, f := range filemanager.GetAll() {
-		err = f.Save()
-		if err != nil {
-			pushNotification(interpreter.Notification{
-				Type:        interpreter.Error,
-				Content:     err.Error(),
-				Instruction: -1,
-			})
-			err = nil
+		if f.IsTemp() {
+			saveTempFileAs("file"+f.ID(), hermes.BuildSetModeJSON("text", f.Text(), "path", ""))
+		} else {
+			err = f.Save()
+			if err != nil {
+				pushNotification(interpreter.Notification{
+					Type:        interpreter.Error,
+					Content:     err.Error(),
+					Instruction: -1,
+				})
+				err = nil
+			}
 		}
 	}
 }

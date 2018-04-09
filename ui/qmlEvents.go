@@ -17,4 +17,5 @@ const (
 	Event_Step              string = "event_step"
 	Event_Pause             string = "event_pause"
 	Event_Stop              string = "event_stop"
+	Event_SaveTempFile      string = "event_savetempfile"
 )

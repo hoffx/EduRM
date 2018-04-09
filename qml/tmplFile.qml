@@ -3,4 +3,5 @@ Filelistitem {
     filename: "<filename>"
     idtext: "<id>"
     current: "<current>"
+    temp: "<temp>"
 }

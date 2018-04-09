@@ -1,6 +1,7 @@
 package filemanager
 
 import (
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -14,6 +15,7 @@ type File struct {
 	path        string
 	text        string
 	breakpoints map[uint]bool
+	isTemp      bool
 }
 
 func NewFile(name, path, text string, breakpoints map[uint]bool) *File {
@@ -23,10 +25,13 @@ func NewFile(name, path, text string, breakpoints map[uint]bool) *File {
 		path:        path,
 		text:        text,
 		breakpoints: breakpoints,
+		isTemp:      false,
 	}
 }
 
 func (f *File) ID() string { return f.id }
+
+func (f *File) IsTemp() bool { return f.isTemp }
 
 func (f *File) Name() string { return f.name }
 
@@ -37,6 +42,9 @@ func (f *File) Text() string { return f.text }
 func (f *File) Breakpoints() map[uint]bool { return f.breakpoints }
 
 func (f *File) Save() (err error) {
+	if f.isTemp {
+		return errors.New("file is temporary")
+	}
 	return ioutil.WriteFile(f.path, []byte(f.text), os.ModePerm)
 }
 

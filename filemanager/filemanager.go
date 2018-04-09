@@ -4,8 +4,10 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -22,6 +24,30 @@ var (
 
 func init() {
 	files = make(map[string]*File, 0)
+}
+
+// AddTempFile creates a in-memory file and
+// sets it as the currently opened file
+func AddTempFile(text string) {
+	var virtualPath string
+	var id string
+	for {
+		id = strconv.Itoa(rand.Intn(2147483647))
+		virtualPath = id + "temp.qml"
+		if files[virtualPath] == nil {
+			break
+		}
+	}
+
+	files[virtualPath] = &File{
+		id:          id,
+		name:        virtualPath,
+		path:        virtualPath,
+		text:        text,
+		breakpoints: make(map[uint]bool, 0),
+		isTemp:      true,
+	}
+	current = virtualPath
 }
 
 // AddFile loads the file from the given path
@@ -43,51 +69,9 @@ func AddFile(path string) (err error) {
 		return errors.New(ErrInvalidFilepath)
 	}
 
-	// create a unique and user-friendly names for all files
-	// with same base
-	var equalNamedFiles []*File
-	for k, _ := range files {
-		if strings.Contains(k, name) {
-			equalNamedFiles = append(equalNamedFiles, files[k])
-			log.Println(files[k])
-		}
-	}
-
-	for _, f := range equalNamedFiles {
-		if f.path == path {
-			return errors.New(ErrFileAlreadyLoaded)
-		} else {
-			var oldsname, newsname string
-			old := strings.Split(f.path, "/")
-			log.Println(old)
-			new := strings.Split(path, "/")
-			length := len(old)
-			if len(new) < len(old) {
-				length = len(new)
-			}
-			diff := len(new) - len(old)
-			for i := length; i >= 0; i-- {
-				o := i - 1
-				n := i - 1
-				if diff < 0 {
-					o -= diff
-				} else {
-					n += diff
-				}
-				if old[o] != new[n] {
-					newsname = buildName(new[n:])
-					oldsname = buildName(old[o:])
-					break
-				}
-			}
-			name = newsname
-
-			delete(files, f.name)
-			log.Println(oldsname)
-			f.name = oldsname
-			files[f.name] = f
-		}
-
+	err = createNewNames(name, path, string(text))
+	if err != nil {
+		return err
 	}
 
 	files[name] = NewFile(name, path, string(text), make(map[uint]bool, 0))
@@ -167,6 +151,56 @@ func Erase(name string) (err error) {
 // SetCurrent sets the currently opened file by its name
 func SetCurrent(name string) {
 	current = name
+}
+
+// create a unique and user-friendly names for all files
+// with same base
+func createNewNames(name, path, text string) error {
+	var equalNamedFiles []*File
+	for k, _ := range files {
+		if strings.Contains(k, name) {
+			equalNamedFiles = append(equalNamedFiles, files[k])
+			log.Println(files[k])
+		}
+	}
+
+	for _, f := range equalNamedFiles {
+		if f.path == path {
+			return errors.New(ErrFileAlreadyLoaded)
+		} else {
+			var oldsname, newsname string
+			old := strings.Split(f.path, "/")
+			log.Println(old)
+			new := strings.Split(path, "/")
+			length := len(old)
+			if len(new) < len(old) {
+				length = len(new)
+			}
+			diff := len(new) - len(old)
+			for i := length; i >= 0; i-- {
+				o := i - 1
+				n := i - 1
+				if diff < 0 {
+					o -= diff
+				} else {
+					n += diff
+				}
+				if old[o] != new[n] {
+					newsname = buildName(new[n:])
+					oldsname = buildName(old[o:])
+					break
+				}
+			}
+			name = newsname
+
+			delete(files, f.name)
+			log.Println(oldsname)
+			f.name = oldsname
+			files[f.name] = f
+		}
+
+	}
+	return nil
 }
 
 func buildName(pathelements []string) (name string) {

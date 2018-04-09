@@ -34,7 +34,8 @@ ApplicationWindow {
                                 accumulatorText:accumulatorText,
                                 registerGrid:registerGrid,
                                 bpSwitch:bpSwitch,
-                                notificationColumn:notificationColumn
+                                notificationColumn:notificationColumn,
+                                saveAsFileDialog:saveAsFileDialog
                             })
         target: hermes
         onSendToQml:
@@ -142,7 +143,7 @@ ApplicationWindow {
                     shortcut: "F5"
                     onTriggered: hermes.sendToGo("event_run","loadButton", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                 }
-		tooltip: "Run the current program or Continue (F5)"
+		        //tooltip: "Run the current program or Continue (F5)"
             }
             ToolButton {
                 id: stepButton
@@ -158,7 +159,7 @@ ApplicationWindow {
                     shortcut: "F6"
                     onTriggered: hermes.sendToGo("event_step","","")
                 }
-		tooltip: "Step: execute one step (F6)"
+		        //tooltip: "Step: execute one step (F6)"
             }
             ToolButton {
                 id: pauseButton
@@ -174,7 +175,7 @@ ApplicationWindow {
                     shortcut: "F7"
                     onTriggered: hermes.sendToGo("event_pause","","")
                 }
-		tooltip: "Pause: pause execution (F7)"
+		        //tooltip: "Pause: pause execution (F7)"
             }
             ToolButton {
                 id: stopButton
@@ -190,7 +191,7 @@ ApplicationWindow {
                     shortcut: "F8"
                     onTriggered: hermes.sendToGo("event_stop","","")
                 }
-		tooltip: "Stop: cancel execution (F8)"
+		        //tooltip: "Stop: cancel execution (F8)"
             }
             Item {
                 height: parent.height
@@ -200,7 +201,6 @@ ApplicationWindow {
                 id: speedSlider
                 width: 100
                 onMoved: hermes.sendToGo("event_slidermoved", "speedSlider", '{"value":'+value+'}')
-		tooltip: "The interval to wait between single steps"
             }
             Text {
                 height: parent.height
@@ -210,7 +210,6 @@ ApplicationWindow {
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-		tooltip: "The interval to wait between single steps"
             }            
         }
         Row {
@@ -299,7 +298,7 @@ ApplicationWindow {
                         source: "img/add.png"
                     }
                     onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
-		    tooltip: "New File"
+		            //tooltip: "New File"
                 }
                 ToolButton {
                     height: parent.height
@@ -310,8 +309,8 @@ ApplicationWindow {
                         source: "img/open.png"
                     }
 
-                    onClicked: fileDialog.open()
-		    tooltip: "Open File"
+                    onClicked: openFileDialog.open()
+		            //tooltip: "Open File"
                 }
             }
             Item{
@@ -521,7 +520,7 @@ ApplicationWindow {
     }
 
     FileDialog {
-        id: fileDialog
+        id: openFileDialog
         visible: false
         title: qsTr("Select your assembly file")
         selectMultiple: false
@@ -531,6 +530,22 @@ ApplicationWindow {
         sidebarVisible: true
         onAccepted: {
             hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '" }')
+        }
+        onRejected: {}
+    }
+
+    FileDialog {
+        id: saveAsFileDialog
+        visible: false
+        title: qsTr("Define a filepath")
+        selectMultiple: false
+        selectFolder: false
+        selectExisting: false
+        nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
+        selectedNameFilter: "Assembly Files (*.asm *.spaen)"
+        sidebarVisible: true
+        onAccepted: {
+            hermes.sendToGo("event_savetempfile", "saveAsFileDialog", '{ "path": "' + fileUrl + '"}')
         }
         onRejected: {}
     }
