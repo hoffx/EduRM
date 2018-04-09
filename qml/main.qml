@@ -143,7 +143,13 @@ ApplicationWindow {
                     shortcut: "F5"
                     onTriggered: hermes.sendToGo("event_run","loadButton", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                 }
+<<<<<<< HEAD
 		        //tooltip: "Run the current program or Continue (F5)"
+=======
+		ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "Run the current program or Continue (F5)"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
             }
             ToolButton {
                 id: stepButton
@@ -159,7 +165,13 @@ ApplicationWindow {
                     shortcut: "F6"
                     onTriggered: hermes.sendToGo("event_step","","")
                 }
+<<<<<<< HEAD
 		        //tooltip: "Step: execute one step (F6)"
+=======
+		ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "Step: execute one step (F6)"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
             }
             ToolButton {
                 id: pauseButton
@@ -175,7 +187,13 @@ ApplicationWindow {
                     shortcut: "F7"
                     onTriggered: hermes.sendToGo("event_pause","","")
                 }
+<<<<<<< HEAD
 		        //tooltip: "Pause: pause execution (F7)"
+=======
+		ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "Pause: pause execution (F7)"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
             }
             ToolButton {
                 id: stopButton
@@ -191,7 +209,13 @@ ApplicationWindow {
                     shortcut: "F8"
                     onTriggered: hermes.sendToGo("event_stop","","")
                 }
+<<<<<<< HEAD
 		        //tooltip: "Stop: cancel execution (F8)"
+=======
+		ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "Stop: cancel execution (F8)"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
             }
             Item {
                 height: parent.height
@@ -201,6 +225,12 @@ ApplicationWindow {
                 id: speedSlider
                 width: 100
                 onMoved: hermes.sendToGo("event_slidermoved", "speedSlider", '{"value":'+value+'}')
+<<<<<<< HEAD
+=======
+		ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "The interval to wait between single steps"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
             }
             Text {
                 height: parent.height
@@ -210,6 +240,12 @@ ApplicationWindow {
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
+<<<<<<< HEAD
+=======
+		ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "The interval to wait between single steps"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
             }            
         }
         Row {
@@ -298,7 +334,13 @@ ApplicationWindow {
                         source: "img/add.png"
                     }
                     onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+<<<<<<< HEAD
 		            //tooltip: "New File"
+=======
+		    ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "New File"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
                 }
                 ToolButton {
                     height: parent.height
@@ -309,8 +351,15 @@ ApplicationWindow {
                         source: "img/open.png"
                     }
 
+<<<<<<< HEAD
                     onClicked: openFileDialog.open()
 		            //tooltip: "Open File"
+=======
+                    onClicked: fileDialog.open()
+		    ToolTip.visible: hovered
+		ToolTip.delay: 1000
+		ToolTip.text: "Open File"
+>>>>>>> 627ce041f28225064d8807bbb6c521cfa34096e7
                 }
             }
             Item{
