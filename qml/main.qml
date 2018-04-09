@@ -139,9 +139,10 @@ ApplicationWindow {
 
                 Action {
                     id: runAction
-                    shortcut: "F7"
+                    shortcut: "F5"
                     onTriggered: hermes.sendToGo("event_run","loadButton", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                 }
+		tooltip: "Run the current program or Continue (F5)"
             }
             ToolButton {
                 id: stepButton
@@ -154,9 +155,10 @@ ApplicationWindow {
 
                 Action {
                     id: stepAction
-                    shortcut: "F8"
+                    shortcut: "F6"
                     onTriggered: hermes.sendToGo("event_step","","")
                 }
+		tooltip: "Step: execute one step (F6)"
             }
             ToolButton {
                 id: pauseButton
@@ -169,9 +171,10 @@ ApplicationWindow {
 
                 Action {
                     id: pauseAction
-                    shortcut: "F9"
+                    shortcut: "F7"
                     onTriggered: hermes.sendToGo("event_pause","","")
                 }
+		tooltip: "Pause: pause execution (F7)"
             }
             ToolButton {
                 id: stopButton
@@ -184,9 +187,10 @@ ApplicationWindow {
 
                 Action {
                     id: stopAction
-                    shortcut: "F10"
+                    shortcut: "F8"
                     onTriggered: hermes.sendToGo("event_stop","","")
                 }
+		tooltip: "Stop: cancel execution (F8)"
             }
             Item {
                 height: parent.height
@@ -196,6 +200,7 @@ ApplicationWindow {
                 id: speedSlider
                 width: 100
                 onMoved: hermes.sendToGo("event_slidermoved", "speedSlider", '{"value":'+value+'}')
+		tooltip: "The interval to wait between single steps"
             }
             Text {
                 height: parent.height
@@ -205,6 +210,7 @@ ApplicationWindow {
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
+		tooltip: "The interval to wait between single steps"
             }            
         }
         Row {
@@ -293,6 +299,7 @@ ApplicationWindow {
                         source: "img/add.png"
                     }
                     onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+		    tooltip: "New File"
                 }
                 ToolButton {
                     height: parent.height
@@ -304,7 +311,7 @@ ApplicationWindow {
                     }
 
                     onClicked: fileDialog.open()
-
+		    tooltip: "Open File"
                 }
             }
             Item{
