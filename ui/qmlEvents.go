@@ -13,7 +13,6 @@ const (
 	Event_SliderMoved       string = "event_slidermoved"
 	Event_AddRegister       string = "event_addregister"
 	Event_RemoveRegister    string = "event_removeregister"
-	Event_Reload            string = "event_reload"
 	Event_Run               string = "event_run"
 	Event_Step              string = "event_step"
 	Event_Pause             string = "event_pause"

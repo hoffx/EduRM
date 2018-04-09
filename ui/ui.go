@@ -59,7 +59,6 @@ func Run() {
 	hController.AddEventListener(Event_AddRegister, addRegister)
 	hController.AddEventListener(Event_RemoveRegister, removeRegister)
 	hController.AddEventListener(Event_SliderMoved, sliderMoved)
-	hController.AddEventListener(Event_Reload, reload)
 	hController.AddEventListener(Event_Run, run)
 	hController.AddEventListener(Event_Step, step)
 	hController.AddEventListener(Event_Pause, pause)
@@ -302,34 +301,21 @@ func removeRegister(source, jsondata string) {
 	}
 }
 
-func reload(source, jsondata string) {
-	if status == interpreter.Running {
-		stop("", "")
-	}
-	type File struct {
-		Text string `json:"text"`
-	}
-	var f File
-	err := json.Unmarshal([]byte(jsondata), &f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if filemanager.Current() != nil {
-		filemanager.Current().SetText(f.Text)
-		err = filemanager.Current().Save()
-		if err != nil {
-			pushNotification(interpreter.Notification{
-				Type:        interpreter.Error,
-				Content:     err.Error(),
-				Instruction: -1,
-			})
-			return
+func run(source, jsondata string) {
+	if c == nil {
+		type File struct {
+			Text string `json:"text"`
 		}
-		c, err = controller.NewController(filemanager.Current().Path(), registerAmount)
+		var f File
+		err := json.Unmarshal([]byte(jsondata), &f)
+		if err != nil {
+			log.Fatal(err)
+		}
+		c, err = controller.NewController(f.Text, registerAmount)
 		if err != nil {
 			pushNotification(interpreter.Notification{
 				Type:        interpreter.Error,
-				Content:     err.Error(),
+				Content:     "parse failed: " + err.Error(),
 				Instruction: -1,
 			})
 			return
@@ -337,8 +323,10 @@ func reload(source, jsondata string) {
 		go c.Process()
 		go c.SetDelay(delay)
 		if useBreakpoints {
-			for bp := range filemanager.Current().Breakpoints() {
-				go c.AddBreakpoint(bp)
+			if filemanager.Current() != nil {
+				for bp := range filemanager.Current().Breakpoints() {
+					go c.AddBreakpoint(bp)
+				}
 			}
 		}
 		go func() {
@@ -353,9 +341,6 @@ func reload(source, jsondata string) {
 			c = nil
 		}()
 	}
-}
-
-func run(source, jsondata string) {
 	if c != nil {
 		go c.Run()
 	}

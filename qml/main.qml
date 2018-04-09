@@ -129,21 +129,6 @@ ApplicationWindow {
             height: parent.height
             width: parent.width * .7
             ToolButton {
-                id: loadButton
-                Image{
-                    anchors.fill: parent
-                    scale: 0.5
-                    source: "img/load.png"
-                }
-                action: loadAction
-
-                Action {
-                    id: loadAction
-                    shortcut: "F6"
-                    onTriggered: hermes.sendToGo("event_reload","loadButton", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
-                }           
-            }
-            ToolButton {
                 id: runButton
                 Image{
                     anchors.fill: parent
@@ -155,7 +140,7 @@ ApplicationWindow {
                 Action {
                     id: runAction
                     shortcut: "F7"
-                    onTriggered: hermes.sendToGo("event_run","","")
+                    onTriggered: hermes.sendToGo("event_run","loadButton", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                 }
             }
             ToolButton {

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"strings"
 	"time"
 
 	"github.com/hoffx/EduRM/interpreter"
@@ -33,8 +34,8 @@ type Controller struct {
 }
 
 // NewController returns a Controller and an error if occurred
-func NewController(filepath string, registerAmount int) (*Controller, error) {
-	s, err := script.ParseFile(filepath)
+func NewController(text string, registerAmount int) (*Controller, error) {
+	s, err := script.Parse("", strings.NewReader(text))
 	if err != nil {
 		return nil, err
 	}
