@@ -314,6 +314,7 @@ ApplicationWindow {
                         source: "img/add.png"
                     }
                     onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+		    tooltip: "New File"
                 }
                 ToolButton {
                     height: parent.height
@@ -325,7 +326,7 @@ ApplicationWindow {
                     }
 
                     onClicked: fileDialog.open()
-
+		    tooltip: "Open File"
                 }
             }
             Item{
