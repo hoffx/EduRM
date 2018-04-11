@@ -102,7 +102,18 @@ func (c *Controller) Process() {
 								}
 							}
 						}
-						infiniteLoopCandidates = append(infiniteLoopCandidates, c.context)
+						var oldRegisters []int
+						copy(oldRegisters, c.context.Registers)
+						oldContext := interpreter.Context{
+							InstructionCounter: c.context.InstructionCounter,
+							Accumulator:        c.context.Accumulator,
+							Script:             script.Script{},
+							Output:             []interpreter.Notification{},
+							Status:             c.context.Status,
+							Instruction:        c.context.Instruction,
+							Registers:          oldRegisters,
+						}
+						infiniteLoopCandidates = append(infiniteLoopCandidates, oldContext)
 					}
 					if lastInstructionCounter == 0 {
 						time.Sleep(time.Duration(c.delay) * time.Millisecond)
