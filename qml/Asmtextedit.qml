@@ -17,14 +17,22 @@ TextArea {
     font.family: "Menlo, Monaco, 'Courier New', monospace"
 
     Keys.onPressed: {
-        if (event.key == Qt.Key_Return && textEdit.cursorPosition == textEdit.length) {
-            var lines = this.text.split(/\r?\n/g)
-            var lastline = lines[lines.length - 1]
-            lastline.replace(/([0-9]+)[:\s]+.*/g, function(match, p1) {
-                textEdit.append((parseInt(p1)+1).toString() + ": ")
+        if (event.key == Qt.Key_Return) {
+            var nextIC = ""
+            this.text = this.text.replace(/.+/g, function(match, offset){
+                if (cursorPosition === offset + match.length) {
+                    match.replace(/([0-9]+)[:\s]+.*/g, function(match, p1) {
+                        nextIC = (parseInt(p1)+1).toString() + ": "
+                        event.accepted = true
+                        return match
+                    })
+                    return match
+                }
                 return match
             })
-            event.accepted = true
+            if (nextIC != "") {
+                this.insert(cursorPosition, "\n"+nextIC)
+            }
         }
     }
 
