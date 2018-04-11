@@ -239,6 +239,5 @@ func end(ctx *Context) {
 		ctx.Status = Failure
 		return
 	}
-	ctx.InstructionCounter++
 	ctx.Status = Success
 }

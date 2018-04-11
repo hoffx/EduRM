@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -88,6 +89,8 @@ func (c *Controller) Process() {
 						for _, iLCtx := range infiniteLoopCandidates {
 							if iLCtx.InstructionCounter == c.context.InstructionCounter && c.context.Accumulator == iLCtx.Accumulator {
 								var isNotInfinite bool
+								log.Println(len(c.context.Registers))
+								log.Println(len(iLCtx.Registers))
 								for i := range c.context.Registers {
 									if c.context.Registers[i] != iLCtx.Registers[i] {
 										isNotInfinite = true
@@ -102,7 +105,7 @@ func (c *Controller) Process() {
 								}
 							}
 						}
-						var oldRegisters []int
+						oldRegisters := make([]int, len(c.context.Registers))
 						copy(oldRegisters, c.context.Registers)
 						oldContext := interpreter.Context{
 							InstructionCounter: c.context.InstructionCounter,
@@ -113,6 +116,7 @@ func (c *Controller) Process() {
 							Instruction:        c.context.Instruction,
 							Registers:          oldRegisters,
 						}
+						log.Println(oldRegisters)
 						infiniteLoopCandidates = append(infiniteLoopCandidates, oldContext)
 					}
 					if lastInstructionCounter == 0 {
