@@ -221,9 +221,6 @@ ApplicationWindow {
                 styleColor: "#ffffff"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-		ToolTip.visible: hovered
-		ToolTip.delay: 1000
-		ToolTip.text: "The interval to wait between single steps"
             }            
         }
         Row {
@@ -387,40 +384,9 @@ ApplicationWindow {
             boundsBehavior: Flickable.StopAtBounds
 
 
-            TextArea.flickable: TextArea {
+            TextArea.flickable: Asmtextedit {
                 id: textEdit
-                font.pointSize: 13
-                width: parent.parent.width
-                height: parent.parent.height
-                selectByMouse: true
-                selectByKeyboard: true
-                wrapMode: TextArea.Wrap
-                padding: 15
-                background: null
-                text: "1: "
-                font.family: "Menlo, Monaco, 'Courier New', monospace"
-
-                Keys.onPressed: {
-                    if (event.key == Qt.Key_Return && textEdit.cursorPosition == textEdit.length) {
-                        var lines = this.text.split(/\r?\n/g)
-                        var lastline = lines[lines.length - 1]
-                        lastline.replace(/([0-9]+)[:\s]+.*/g, function(match, p1) {
-                            textEdit.append((parseInt(p1)+1).toString() + ": ")
-                            return match
-                        })
-                        event.accepted = true
-                    }
-                }
-
-                MouseArea {
-                    enabled: false
-                    cursorShape: Qt.IBeamCursor
-                    anchors.top: parent.top
-                    anchors.topMargin: parent.padding
-                    anchors.bottomMargin: parent.padding
-                    height: parent.paintedHeight
-                    width: parent.width
-                }
+                hidden: "true"
             }
 
             ScrollBar.vertical: ScrollBar {}
@@ -547,7 +513,7 @@ ApplicationWindow {
         selectedNameFilter: "Assembly Files (*.asm *.spaen)"
         sidebarVisible: true
         onAccepted: {
-            hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '" }')
+            hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'" }')
         }
         onRejected: {}
     }

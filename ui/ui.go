@@ -66,6 +66,7 @@ func Run() {
 	hController.AddEventListener(Event_Stop, stop)
 	hController.AddEventListener(Event_ToggleBreakpoints, toggleBreakpoints)
 	hController.AddEventListener(Event_SaveTempFile, saveTempFileAs)
+	hermes.DoLog = true
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
@@ -153,15 +154,16 @@ func addFileToSystem(source, jsondata string) {
 		})
 		return
 	}
+
 	if filemanager.Current() != nil {
 		storeFileContent("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("text", fi.Text))
 		hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		deleteAllBreakpoints(filemanager.Current().Breakpoints())
-	} else if fi.Path != "" {
-		filemanager.AddTempFile(fi.Text)
-		hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name(), "temp", "true"))
 	}
-	if fi.Path != "" {
+	if fi.Path == "" {
+		filemanager.AddTempFile("")
+		hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name(), "temp", "true"))
+	} else {
 		err = filemanager.AddFile(fi.Path)
 		if err != nil {
 			pushNotification(interpreter.Notification{
@@ -171,10 +173,8 @@ func addFileToSystem(source, jsondata string) {
 			})
 			return
 		}
-	} else {
-		filemanager.AddTempFile(fi.Text)
+		hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name(), "temp", "false"))
 	}
-	hController.AddToQmlFromFile(Column_FileList, hermes.BuildAddModeJSON(`tmplFile.qml`, "id", "file"+filemanager.Current().ID(), "filename", filemanager.Current().Name(), "temp", "false"))
 	hController.SetInQml(TextField_FilePath, hermes.BuildSetModeJSON("text", ""))
 	displayFile(strings.TrimPrefix(filemanager.Current().ID(), "file"))
 	for _, f := range filemanager.GetAll() {
@@ -207,10 +207,12 @@ func showFile(source, jsondata string) {
 
 func removeFile(source, jsondata string) {
 	file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
-
+	log.Println("ho")
 	if file != nil {
+		log.Println("ho2")
 		if file == filemanager.Current() {
-			hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", ""))
+			log.Println("h3")
+			hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", "", "hidden", "true"))
 		}
 		deleteAllBreakpoints(file.Breakpoints())
 		filemanager.Remove(file.Name())
@@ -457,7 +459,7 @@ func displayFile(id string) {
 	// set filelistitem's current property to true
 	hController.SetInQml("file"+id, hermes.BuildSetModeJSON("current", "true"))
 	// set textarea content to current file text
-	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", filemanager.GetByID(id).Text()))
+	hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", filemanager.GetByID(id).Text(), "hidden", "false"))
 	// load breakpoints
 	for bp := range filemanager.Current().Breakpoints() {
 		displayBreakpoint(bp)
