@@ -52,13 +52,7 @@ func AddTempFile(text string) {
 // AddFile loads the file from the given path
 // and sets it as the currently opened file
 func AddFile(path string) (err error) {
-	path = strings.TrimPrefix(path, "file:")
-	path = filepath.Clean(path)
-	path, err = filepath.Abs(path)
-	if err != nil {
-		return
-	}
-	path = filepath.ToSlash(path)
+	path = CleanPath(path)
 	text, err := ioutil.ReadFile(path)
 	if err != nil {
 		return
@@ -205,4 +199,16 @@ func buildName(pathelements []string) (name string) {
 		name += "/" + e
 	}
 	return
+}
+
+// CleanPath creates a clean and absolute filepath. It returns
+// an empty string if an error occurred
+func CleanPath(path string) string {
+	path = strings.TrimPrefix(path, "file:")
+	path = filepath.Clean(path)
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return ""
+	}
+	return filepath.ToSlash(path)
 }

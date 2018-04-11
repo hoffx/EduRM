@@ -34,8 +34,7 @@ ApplicationWindow {
                                 accumulatorText:accumulatorText,
                                 registerGrid:registerGrid,
                                 bpSwitch:bpSwitch,
-                                notificationColumn:notificationColumn,
-                                saveAsFileDialog:saveAsFileDialog
+                                notificationColumn:notificationColumn
                             })
         target: hermes
         onSendToQml:
@@ -518,19 +517,7 @@ ApplicationWindow {
         onRejected: {}
     }
 
-    FileDialog {
+    Saveasfiledialog {
         id: saveAsFileDialog
-        visible: false
-        title: qsTr("Define a filepath")
-        selectMultiple: false
-        selectFolder: false
-        selectExisting: false
-        nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
-        selectedNameFilter: "Assembly Files (*.asm *.spaen)"
-        sidebarVisible: true
-        onAccepted: {
-            hermes.sendToGo("event_savetempfile", "saveAsFileDialog", '{ "path": "' + fileUrl + '"}')
-        }
-        onRejected: {}
     }
 }

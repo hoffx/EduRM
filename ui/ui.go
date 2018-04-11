@@ -26,7 +26,7 @@ var (
 
 	// backend
 	c              *controller.Controller
-	registerAmount int = -1
+	registerCount  int = -1
 	delay          int
 	status         int
 	useBreakpoints bool = true
@@ -78,7 +78,7 @@ func Run() {
 // event listeners:
 
 func windowLoaded(source, jsondata string) {
-	for i := registerAmount; i < 15; i++ {
+	for i := registerCount; i < 15; i++ {
 		addRegister("", "")
 	}
 }
@@ -100,42 +100,37 @@ func saveTempFileAs(source, jsondata string) {
 		})
 		return
 	}
-	if fi.Text != "" {
-		id := strings.TrimPrefix(source, "file")
-		f := filemanager.GetByID(id)
-		if f != nil {
-			f.SetText(fi.Text)
-			idToSave = id
-		} else {
-			pushNotification(interpreter.Notification{
-				Type:        interpreter.Error,
-				Content:     "file not registered",
-				Instruction: -1,
-			})
-			return
+	var file *filemanager.File
+	if filemanager.Current() != nil && filemanager.Current().ID() == strings.TrimPrefix(source, "file") {
+		file = filemanager.Current()
+		storeFileContent(file.ID(), fi.Text)
+	} else {
+		file = filemanager.GetByID(strings.TrimPrefix(source, "file"))
+		if file == nil {
+			log.Fatal("illegal state")
 		}
-	} else if fi.Path != "" && idToSave != "" {
-		f := filemanager.GetByID(idToSave)
-		if f != nil {
-			pushNotification(interpreter.Notification{
-				Type:        interpreter.Error,
-				Content:     "file not registered",
-				Instruction: -1,
-			})
-			return
-		}
-		err = ioutil.WriteFile(fi.Path, []byte(f.Text()), os.ModePerm)
-		if f != nil {
-			pushNotification(interpreter.Notification{
-				Type:        interpreter.Error,
-				Content:     err.Error(),
-				Instruction: -1,
-			})
-			return
-		}
-		idToSave = ""
 	}
-
+	cleanedPath := filemanager.CleanPath(fi.Path)
+	if cleanedPath == "" {
+		pushNotification(interpreter.Notification{
+			Type:        interpreter.Error,
+			Content:     "illegal filepath",
+			Instruction: -1,
+		})
+		return
+	}
+	err = ioutil.WriteFile(cleanedPath, []byte(file.Text()), 0644)
+	if err != nil {
+		pushNotification(interpreter.Notification{
+			Type:        interpreter.Error,
+			Content:     err.Error(),
+			Instruction: -1,
+		})
+		return
+	}
+	filemanager.Remove(file.Name())
+	hController.RemoveFromQml(source)
+	addFileToSystem("", jsondata)
 }
 
 func addFileToSystem(source, jsondata string) {
@@ -155,7 +150,7 @@ func addFileToSystem(source, jsondata string) {
 	}
 
 	if filemanager.Current() != nil {
-		storeFileContent("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("text", fi.Text))
+		storeFileContent(filemanager.Current().ID(), fi.Text)
 		hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		deleteAllBreakpoints(filemanager.Current().Breakpoints())
 	}
@@ -340,8 +335,8 @@ func sliderMoved(source, jsondata string) {
 
 func addRegister(source, jsondata string) {
 	if status != interpreter.Running {
-		registerAmount++
-		hController.AddToQmlFromFile(Grid_RegisterList, hermes.BuildAddModeJSON("tmplRegister.qml", "id", "register"+strconv.Itoa(registerAmount), "number", strconv.Itoa(registerAmount), "value", "0"))
+		registerCount++
+		hController.AddToQmlFromFile(Grid_RegisterList, hermes.BuildAddModeJSON("tmplRegister.qml", "id", "register"+strconv.Itoa(registerCount), "number", strconv.Itoa(registerCount), "value", "0"))
 	} else {
 		pushNotification(interpreter.Notification{
 			Type:        interpreter.Warning,
@@ -353,9 +348,9 @@ func addRegister(source, jsondata string) {
 
 func removeRegister(source, jsondata string) {
 	if status != interpreter.Running {
-		if registerAmount != -1 {
-			hController.RemoveFromQml("register" + strconv.Itoa(registerAmount))
-			registerAmount--
+		if registerCount != -1 {
+			hController.RemoveFromQml("register" + strconv.Itoa(registerCount))
+			registerCount--
 		}
 	} else {
 		pushNotification(interpreter.Notification{
@@ -376,7 +371,7 @@ func run(source, jsondata string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		c, err = controller.NewController(f.Text, registerAmount+1)
+		c, err = controller.NewController(f.Text, registerCount+1)
 		if err != nil {
 			pushNotification(interpreter.Notification{
 				Type:        interpreter.Error,

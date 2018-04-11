@@ -52,8 +52,8 @@ Item {
                     if(temp === "false"){
                         hermes.sendToGo("event_savefile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                     }else{
+                        saveAsFileDialog.idToSave = idtext
                         saveAsFileDialog.open()
-                        hermes.sendToGo("event_savetempfile", idtext, '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
                     }
                     
                 }

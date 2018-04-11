@@ -14,5 +14,4 @@ const (
 	Grid_RegisterList              string = "registerGrid"
 	Switch_Breakpoints             string = "bpSwitch"
 	Column_Notifications           string = "notificationColumn"
-	FileDialog_SaveAsFile          string = "saveAsFileDialog"
 )
