@@ -14,4 +14,5 @@ const (
 	Grid_RegisterList              string = "registerGrid"
 	Switch_Breakpoints             string = "bpSwitch"
 	Column_Notifications           string = "notificationColumn"
+	ToolBar_BreakpointsBarHider    string = "bpBarHider"
 )

@@ -34,7 +34,8 @@ ApplicationWindow {
                                 accumulatorText:accumulatorText,
                                 registerGrid:registerGrid,
                                 bpSwitch:bpSwitch,
-                                notificationColumn:notificationColumn
+                                notificationColumn:notificationColumn,
+                                bpBarHider:bpBarHider
                             })
         target: hermes
         onSendToQml:
@@ -500,6 +501,11 @@ ApplicationWindow {
                 }
             } 
         }
+    }
+
+    Breakpointsbarhider {
+        id: bpBarHider
+        hide: "false"
     }
 
     FileDialog {

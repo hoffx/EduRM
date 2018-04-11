@@ -380,7 +380,11 @@ func run(source, jsondata string) {
 			})
 			return
 		}
-		go c.Process()
+		go func() {
+			hController.SetInQml(ToolBar_BreakpointsBarHider, hermes.BuildSetModeJSON("hide", "true"))
+			c.Process()
+			hController.SetInQml(ToolBar_BreakpointsBarHider, hermes.BuildSetModeJSON("hide", "false"))
+		}()
 		go c.SetDelay(delay)
 		if useBreakpoints {
 			if filemanager.Current() != nil {
