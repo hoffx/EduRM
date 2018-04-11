@@ -66,7 +66,6 @@ func Run() {
 	hController.AddEventListener(Event_Stop, stop)
 	hController.AddEventListener(Event_ToggleBreakpoints, toggleBreakpoints)
 	hController.AddEventListener(Event_SaveTempFile, saveTempFileAs)
-	hermes.DoLog = true
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
@@ -207,11 +206,8 @@ func showFile(source, jsondata string) {
 
 func removeFile(source, jsondata string) {
 	file := filemanager.GetByID(strings.TrimPrefix(source, "file"))
-	log.Println("ho")
 	if file != nil {
-		log.Println("ho2")
 		if file == filemanager.Current() {
-			log.Println("h3")
 			hController.SetInQml(TextArea_FileContent, hermes.BuildSetModeJSON("text", "", "hidden", "true"))
 		}
 		deleteAllBreakpoints(file.Breakpoints())
@@ -380,7 +376,7 @@ func run(source, jsondata string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		c, err = controller.NewController(f.Text, registerAmount)
+		c, err = controller.NewController(f.Text, registerAmount+1)
 		if err != nil {
 			pushNotification(interpreter.Notification{
 				Type:        interpreter.Error,

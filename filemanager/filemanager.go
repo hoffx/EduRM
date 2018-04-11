@@ -3,7 +3,6 @@ package filemanager
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -160,7 +159,6 @@ func createNewNames(name, path, text string) error {
 	for k, _ := range files {
 		if strings.Contains(k, name) {
 			equalNamedFiles = append(equalNamedFiles, files[k])
-			log.Println(files[k])
 		}
 	}
 
@@ -170,7 +168,6 @@ func createNewNames(name, path, text string) error {
 		} else {
 			var oldsname, newsname string
 			old := strings.Split(f.path, "/")
-			log.Println(old)
 			new := strings.Split(path, "/")
 			length := len(old)
 			if len(new) < len(old) {
@@ -194,7 +191,6 @@ func createNewNames(name, path, text string) error {
 			name = newsname
 
 			delete(files, f.name)
-			log.Println(oldsname)
 			f.name = oldsname
 			files[f.name] = f
 		}
