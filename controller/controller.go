@@ -83,7 +83,7 @@ func (c *Controller) Process() {
 						mode = pause
 					}
 					// check if script ran into infinite loop
-					if lastInstructionCounter+1 != c.context.InstructionCounter {
+					if lastInstructionCounter+1 != c.context.InstructionCounter && strings.ToUpper(c.context.Instruction) != "END" {
 						// check if current context is identical to a previous candidate
 						for _, iLCtx := range infiniteLoopCandidates {
 							if iLCtx.InstructionCounter == c.context.InstructionCounter && c.context.Accumulator == iLCtx.Accumulator {
