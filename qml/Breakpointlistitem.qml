@@ -6,6 +6,9 @@ ToolButton{
     property string buttontext: ""
     property string idtext: ""
     
+    ToolTip.visible: hovered
+    ToolTip.delay: 1000
+    ToolTip.text: "Click here to delete this breakpoint"
 
     contentItem: Text {
         text: buttontext

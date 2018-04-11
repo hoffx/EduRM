@@ -309,9 +309,9 @@ ApplicationWindow {
                         source: "img/add.png"
                     }
                     onClicked: hermes.sendToGo("event_addfile", "addFileFromFilepath", '{ "path": "' + filepath.text + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
-		    ToolTip.visible: hovered
-		ToolTip.delay: 1000
-		ToolTip.text: "New File"
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 1000
+                    ToolTip.text: "New File (leave text field empty to create a temporary file)"
                 }
                 ToolButton {
                     height: parent.height
@@ -323,9 +323,9 @@ ApplicationWindow {
                     }
 
                     onClicked: fileDialog.open()
-		    ToolTip.visible: hovered
-		ToolTip.delay: 1000
-		ToolTip.text: "Open File"
+		            ToolTip.visible: hovered
+                    ToolTip.delay: 1000
+                    ToolTip.text: "Open File"
                 }
             }
             Item{
@@ -433,6 +433,10 @@ ApplicationWindow {
                 checked: true
                 height: parent.height
                 onClicked: hermes.sendToGo("event_togglebreakpoints", "", "")
+
+                ToolTip.visible: hovered
+                ToolTip.delay: 1000
+                ToolTip.text: "Enable/disable breakpoints for the next run"
             }
             Item {
                 height: parent.height
@@ -452,6 +456,11 @@ ApplicationWindow {
             ToolButton {
                 height: parent.height
                 width: height
+
+                ToolTip.visible: hovered
+                ToolTip.delay: 1000
+                ToolTip.text: "Add a breakpoint"
+
                 Image{
                     anchors.fill: parent
                     scale: 0.5
@@ -483,6 +492,10 @@ ApplicationWindow {
             ToolButton {
                 onClicked: hermes.sendToGo("event_addregister", "", "")
 
+                ToolTip.visible: hovered
+                ToolTip.delay: 1000
+                ToolTip.text: "Add a register"
+
                 Image{
                     anchors.fill: parent
                     scale: 0.5
@@ -493,6 +506,10 @@ ApplicationWindow {
             ToolButton {
                 padding: 5
                 onClicked: hermes.sendToGo("event_removeregister", "", "")
+
+                ToolTip.visible: hovered
+                ToolTip.delay: 1000
+                ToolTip.text: "Delete a register"
 
                 Image{
                     anchors.fill: parent

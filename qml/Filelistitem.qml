@@ -43,6 +43,11 @@ Item {
                 height: parent.height
                 width: height
                 opacity: parent.parent.containsMouse ? 1 : 0
+
+                ToolTip.visible: hovered
+                ToolTip.delay: 1000
+                ToolTip.text: "Save this file"
+
                 Image{
                     anchors.fill: parent
                     scale: 0.5
@@ -62,6 +67,11 @@ Item {
                 height: parent.height
                 width: height
                 opacity: parent.parent.containsMouse ? 1 : 0
+
+                ToolTip.visible: hovered
+                ToolTip.delay: 1000
+                ToolTip.text: "Close this file"
+
                 Image{
                     anchors.fill: parent
                     scale: 0.5
