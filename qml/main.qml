@@ -99,6 +99,12 @@ ApplicationWindow {
         hermes.sendToGo("event_windowloaded", "", "")
     }
 
+    onActiveChanged: {
+        if (active === false && textEdit.visible === true) {
+            hermes.sendToGo("event_storecurrent", "", '{"text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+        }
+    }
+
     Action {
         id: saveAction
         shortcut: StandardKey.Save

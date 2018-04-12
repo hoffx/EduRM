@@ -36,6 +36,12 @@ TextArea {
         }
     }
 
+    onFocusChanged: {
+        if (focus === false && textEdit.visible === true) {
+            hermes.sendToGo("event_storecurrent", "", '{"text":"'+text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'"}')
+        }
+    }
+
     MouseArea {
         enabled: false
         cursorShape: Qt.IBeamCursor

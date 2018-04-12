@@ -18,4 +18,5 @@ const (
 	Event_Pause             string = "event_pause"
 	Event_Stop              string = "event_stop"
 	Event_SaveTempFile      string = "event_savetempfile"
+	Event_StoreCurrent      string = "event_storecurrent"
 )

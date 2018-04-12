@@ -70,6 +70,7 @@ func Run(path, version string) {
 	hController.AddEventListener(Event_Stop, stop)
 	hController.AddEventListener(Event_ToggleBreakpoints, toggleBreakpoints)
 	hController.AddEventListener(Event_SaveTempFile, saveTempFileAs)
+	hController.AddEventListener(Event_StoreCurrent, storeCurrent)
 
 	// Load the main qml file
 	window := qml.NewQQmlComponent5(engine, core.NewQUrl3(path, 0), nil)
@@ -87,7 +88,7 @@ func event(event *core.QEvent) bool {
 			time.Sleep(50 * time.Millisecond)
 		}
 		file := gui.NewQFileOpenEventFromPointer(event.Pointer())
-		addFileToSystem("", hermes.BuildSetModeJSON("path", file.File(), "text", ""))
+		addFileToSystem("", hermes.BuildSetModeJSON("path", file.File(), "text", "", "donotstoreold", "true"))
 		event.Accept()
 		return true
 	}
@@ -103,13 +104,31 @@ func windowLoaded(source, jsondata string) {
 	// handle windows & linux file opening
 	for i := 1; i < len(os.Args); i++ {
 		if _, err := os.Stat(os.Args[i]); err == nil {
-			addFileToSystem("", hermes.BuildSetModeJSON("path", os.Args[i], "text", ""))
+			addFileToSystem("", hermes.BuildSetModeJSON("path", os.Args[i], "text", "", "donotstoreold", "true"))
 		}
 	}
 	ready = true
 }
 
-var idToSave string
+func storeCurrent(source, jsondata string) {
+	if filemanager.Current() != nil {
+		file := filemanager.Current()
+		type File struct {
+			Text string
+		}
+		var f File
+		err := json.Unmarshal([]byte(jsondata), &f)
+		if err != nil {
+			pushNotification(interpreter.Notification{
+				Type:        interpreter.Error,
+				Content:     err.Error(),
+				Instruction: -1,
+			})
+			return
+		}
+		file.SetText(f.Text)
+	}
+}
 
 func saveTempFileAs(source, jsondata string) {
 	type FileInfo struct {
@@ -161,8 +180,9 @@ func saveTempFileAs(source, jsondata string) {
 
 func addFileToSystem(source, jsondata string) {
 	type FileInfo struct {
-		Path string
-		Text string
+		Path          string
+		Text          string
+		DoNotStoreOld string
 	}
 	var fi FileInfo
 	err := json.Unmarshal([]byte(jsondata), &fi)
@@ -176,7 +196,9 @@ func addFileToSystem(source, jsondata string) {
 	}
 
 	if filemanager.Current() != nil {
-		storeFileContent(filemanager.Current().ID(), fi.Text)
+		if fi.DoNotStoreOld != "true" {
+			storeFileContent(filemanager.Current().ID(), fi.Text)
+		}
 		hController.SetInQml("file"+filemanager.Current().ID(), hermes.BuildSetModeJSON("current", "false"))
 		deleteAllBreakpoints(filemanager.Current().Breakpoints())
 	}
