@@ -24,6 +24,7 @@ var (
 	// ui
 	root        *core.QObject
 	hController *hermes.Controller
+	path        string
 
 	// backend
 	c              *controller.Controller
@@ -35,6 +36,7 @@ var (
 )
 
 func Run(path, version string) {
+	path = path
 	core.QCoreApplication_SetOrganizationName("HoffX")
 	core.QCoreApplication_SetApplicationName("EduRM")
 	core.QCoreApplication_SetApplicationVersion(version)
@@ -91,6 +93,8 @@ func event(event *core.QEvent) bool {
 		addFileToSystem("", hermes.BuildSetModeJSON("path", file.File(), "text", "", "donotstoreold", "true"))
 		event.Accept()
 		return true
+	} else if event.Type() == core.QEvent__Quit {
+		os.Exit(0)
 	}
 	return root.EventDefault(event)
 }

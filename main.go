@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,10 +32,5 @@ func main() {
 	if !path.IsAbs(GuiPath) {
 		GuiPath = filepath.Dir(os.Args[0]) + "/" + GuiPath
 	}
-	var args string
-	for _, a := range os.Args {
-		args += a + " | "
-	}
-	ioutil.WriteFile("/Volumes/Data/theMomax/edurm.txt", []byte(args), os.ModePerm)
 	ui.Run(GuiPath, Version)
 }
