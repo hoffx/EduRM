@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hoffx/EduRM/controller"
 	"github.com/hoffx/EduRM/filemanager"
@@ -30,17 +31,20 @@ var (
 	delay          int
 	status         int
 	useBreakpoints bool = true
+	ready          bool = false
 )
 
-func Run() {
+func Run(path, version string) {
+	core.QCoreApplication_SetOrganizationName("HoffX")
+	core.QCoreApplication_SetApplicationName("EduRM")
+	core.QCoreApplication_SetApplicationVersion(version)
 
 	// Create application
 	app := gui.NewQGuiApplication(len(os.Args), os.Args)
-	core.QCoreApplication_SetOrganizationName("HoffX")
-	core.QCoreApplication_SetApplicationName("EduRM")
-	core.QCoreApplication_SetApplicationVersion("development")
 	// Enable high DPI scaling
+	app.SetAttribute(core.Qt__AA_UseHighDpiPixmaps, true)
 	app.SetAttribute(core.Qt__AA_EnableHighDpiScaling, true)
+	app.ConnectEvent(event)
 
 	// Use the material style for qml
 	quickcontrols2.QQuickStyle_SetStyle("material")
@@ -68,11 +72,26 @@ func Run() {
 	hController.AddEventListener(Event_SaveTempFile, saveTempFileAs)
 
 	// Load the main qml file
-	window := qml.NewQQmlComponent5(engine, core.NewQUrl3("qml/main.qml", 0), nil)
+	window := qml.NewQQmlComponent5(engine, core.NewQUrl3(path, 0), nil)
 	root = window.Create(engine.RootContext())
 
 	// Execute app
 	gui.QGuiApplication_Exec()
+}
+
+// qt event handler
+func event(event *core.QEvent) bool {
+	// handle macOS file opening
+	if event.Type() == core.QEvent__FileOpen {
+		for !ready {
+			time.Sleep(50 * time.Millisecond)
+		}
+		file := gui.NewQFileOpenEventFromPointer(event.Pointer())
+		addFileToSystem("", hermes.BuildSetModeJSON("path", file.File(), "text", ""))
+		event.Accept()
+		return true
+	}
+	return root.EventDefault(event)
 }
 
 // event listeners:
@@ -81,6 +100,13 @@ func windowLoaded(source, jsondata string) {
 	for i := registerCount; i < 15; i++ {
 		addRegister("", "")
 	}
+	// handle windows & linux file opening
+	for i := 1; i < len(os.Args); i++ {
+		if _, err := os.Stat(os.Args[i]); err == nil {
+			addFileToSystem("", hermes.BuildSetModeJSON("path", os.Args[i], "text", ""))
+		}
+	}
+	ready = true
 }
 
 var idToSave string

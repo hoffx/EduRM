@@ -311,3 +311,4 @@ EduRM.exe
 *moc*
 *rcc*
 deploy/*
+darwin/Contents/Resources/qml*

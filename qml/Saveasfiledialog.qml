@@ -8,7 +8,7 @@ FileDialog {
     selectMultiple: false
     selectFolder: false
     selectExisting: false
-    nameFilters: [ "Assembly Files (*.spasm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
+    nameFilters: [ "Assembly Files (*.spasm *.spaen)", "All files (*)" ]
     selectedNameFilter: "Assembly Files (*.spasm *.spaen)"
     sidebarVisible: true
     onAccepted: {

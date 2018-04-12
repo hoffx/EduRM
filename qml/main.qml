@@ -321,11 +321,11 @@ ApplicationWindow {
                         scale: 0.5
                         source: "img/open.png"
                     }
-
-                    onClicked: fileDialog.open()
 		            ToolTip.visible: hovered
                     ToolTip.delay: 1000
                     ToolTip.text: "Open File"
+
+                    onClicked: openFileDialog.open()
                 }
             }
             Item{
@@ -531,8 +531,8 @@ ApplicationWindow {
         title: qsTr("Select your assembly file")
         selectMultiple: false
         selectFolder: false
-        nameFilters: [ "Assembly Files (*.asm *.spaen)", "Raw Text Files (*.txt)", "All files (*)" ]
-        selectedNameFilter: "Assembly Files (*.asm *.spaen)"
+        nameFilters: [ "Assembly Files (*.spasm *.spaen)", "All files (*)" ]
+        selectedNameFilter: "Assembly Files (*.spasm *.spaen)"
         sidebarVisible: true
         onAccepted: {
             hermes.sendToGo("event_addfile", "fileDialog", '{ "path": "' + fileUrl + '", "text":"'+textEdit.text.replace(/"/g, '\\"').replace(/\t/g,"\\t")+'" }')
