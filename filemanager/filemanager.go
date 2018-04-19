@@ -204,11 +204,16 @@ func buildName(pathelements []string) (name string) {
 // CleanPath creates a clean and absolute filepath. It returns
 // an empty string if an error occurred
 func CleanPath(path string) string {
-	path = strings.TrimPrefix(path, "file:")
 	path = filepath.Clean(path)
+	path = filepath.ToSlash(path)
+	path = strings.TrimPrefix(path, "file:")
+	if strings.Contains(path, ":") {
+		// absolute windows path
+		path = strings.TrimPrefix(path, "/")
+	}
 	path, err := filepath.Abs(path)
 	if err != nil {
 		return ""
 	}
-	return filepath.ToSlash(path)
+	return path
 }
