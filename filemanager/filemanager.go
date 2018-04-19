@@ -32,7 +32,7 @@ func AddTempFile(text string) {
 	var id string
 	for {
 		id = strconv.Itoa(rand.Intn(2147483647))
-		virtualPath = id + "temp.qml"
+		virtualPath = id + "temp.spasm"
 		if files[virtualPath] == nil {
 			break
 		}
