@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/hoffx/EduRM/ui"
+	"runtime"
 )
 
 // Version holds the version-string. It is set during the
@@ -29,7 +30,7 @@ func main() {
 	if GuiPath == "" {
 		GuiPath = "qml/main.qml"
 	}
-	if !path.IsAbs(GuiPath) {
+	if !path.IsAbs(GuiPath) && runtime.GOOS != "windows" {
 		GuiPath = filepath.Dir(os.Args[0]) + "/" + GuiPath
 	}
 	ui.Run(GuiPath, Version)
