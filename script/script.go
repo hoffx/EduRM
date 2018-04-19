@@ -7,9 +7,10 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
-var instructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([A-Z]+)(\s+(-?[0-9]+))?\s*(--.*)?$`)
+var instructionRegex = regexp.MustCompile(`^([0-9]+)[:\s]+([a-zA-Z]+)(\s+(-?[0-9]+))?\s*(--.*)?$`)
 
 // Script represents a script written in assembly ready to be interpreted
 type Script struct {
@@ -65,7 +66,7 @@ func ParseInstruction(instruction string) (Instruction, error) {
 	}
 	return Instruction{
 		Number:     id,
-		Identifier: s[2],
+		Identifier: strings.ToUpper(s[2]),
 		Parameters: params,
 	}, nil
 }
